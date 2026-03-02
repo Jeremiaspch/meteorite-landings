@@ -12,4 +12,4 @@
 [https://sos2526-14.onrender.com/](https://sos2526-14.onrender.com/)
 
 -**API**
-[(https://sos2526-14.onrender.com/api/v1/)](https://sos2526-14.onrender.com/api/v1/)
+-Jaime Garcia Algarra: [(https://sos2526-14.onrender.com/api/v1/active-satellites)](https://sos2526-14.onrender.com/api/v1/active-satellites)
