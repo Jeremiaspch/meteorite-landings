@@ -7,7 +7,10 @@ const Datastore = require('@seald-io/nedb');
 // 1. Configuración de rutas y DB
 // IMPORTANTE: Al estar en src/back/api, usamos ../../../ para llegar a la raíz
 const meteorite_csv = path.join(__dirname, "/../data/meteorite-landings-with-country.csv");
-const db = new Datastore({ filename: '/../data/meteoritos.db', autoload: true });
+const db = new Datastore({ 
+    filename: path.join(process.cwd(), "data", "meteoritos.db"), 
+    autoload: true 
+});
 
 const camposObligatorios = ["name", "id", "name_type", "class", "mass", "fall", "year", "latitude", "longitude", "geolocation", "country"];
 
