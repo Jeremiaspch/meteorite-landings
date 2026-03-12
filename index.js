@@ -6,7 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(express.json()); // Para leer JSON (sustituye a body-parser)
-app.use("/", express.static("./public")); 
+app.use("/", express.static("./public"));
+
+app.get("/", (req, res) => {
+    res.status(200).send("SOS2526-14 API is running correctly 🚀");
+});
 
 loadBackend(app); 
 
