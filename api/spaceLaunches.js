@@ -1,182 +1,224 @@
 const express = require("express");
 const router = express.Router();
-const fs = require("fs");
 const path = require("path");
-const csv = require("csv-parser");
+const Datastore = require("nedb");
+const csv = require("csvtojson");
 
-const filePath = path.join(__dirname, "../data/space-missions-with-country.csv");
+const csvFile = path.join(__dirname, "../data/space-missions-with-country.csv");
 
-let spaceLaunches = [];
-
-/* ================================
-   FUNCIÓN PARA CARGAR CSV
-================================ */
-
-function loadCSV() {
-    spaceLaunches = [];
-
-    return new Promise((resolve, reject) => {
-        fs.createReadStream(filePath)
-            .pipe(csv())
-            .on("data", (row) => {
-
-                row.mission_id = Number(row.mission_id);
-                row.year = Number(row.year);
-                row.latitude = Number(row.latitude);
-                row.longitude = Number(row.longitude);
-                row.cost = row.cost ? Number(row.cost) : null;
-
-                spaceLaunches.push(row);
-            })
-            .on("end", resolve)
-            .on("error", reject);
-    });
-}
+const db = new Datastore({
+    filename: "./data/space-launches.db",
+    autoload: true
+});
 
 /* ================================
-   FUNCIÓN PARA GUARDAR CSV
-================================ */
-
-function saveCSV() {
-    const header = "mission_id,company_name,location,launch_date,year,latitude,longitude,cost,rocket_name,rocket_status,mission_status,country\n";
-
-    const rows = spaceLaunches.map(l =>
-`${l.mission_id},"${l.company_name}","${l.location}",${l.launch_date},${l.year},${l.latitude},${l.longitude},${l.cost ?? ""},"${l.rocket_name}",${l.rocket_status},${l.mission_status},${l.country}`
-    ).join("\n");
-
-    fs.writeFileSync(filePath, header + rows + "\n");
-}
-
-/* ================================
-   1️⃣ LOAD INITIAL DATA
+   LOAD INITIAL DATA
 ================================ */
 
 router.get("/loadInitialData", async (req, res) => {
 
-    if (spaceLaunches.length === 0) {
-        try {
-            await loadCSV();
-            res.status(201).json({
-                message: "Datos cargados correctamente",
-                count: spaceLaunches.length
-            });
-        } catch (error) {
-            res.status(500).json({ error: "Error cargando el CSV" });
+    db.count({}, async (err, count) => {
+
+        if (count > 0) {
+            return res.status(400).json({ error: "Los datos ya están cargados" });
         }
-    } else {
-        res.status(400).json({ error: "Los datos ya están cargados." });
-    }
+
+        try {
+
+            const data = await csv().fromFile(csvFile);
+
+            const launches = data.map(l => ({
+                mission_id: Number(l.mission_id),
+                company_name: l.company_name,
+                location: l.location,
+                launch_date: l.launch_date,
+                year: Number(l.year),
+                latitude: Number(l.latitude),
+                longitude: Number(l.longitude),
+                cost: l.cost ? Number(l.cost) : null,
+                rocket_name: l.rocket_name,
+                rocket_status: l.rocket_status,
+                mission_status: l.mission_status,
+                country: l.country
+            }));
+
+            db.insert(launches, (err, newDocs) => {
+
+                const cleanDocs = newDocs.map(d => {
+                    delete d._id;
+                    return d;
+                });
+
+                res.status(201).json({
+                    message: "Datos cargados",
+                    count: cleanDocs.length
+                });
+
+            });
+
+        } catch (error) {
+            res.status(500).json({ error: "Error cargando CSV" });
+        }
+
+    });
+
 });
 
 /* ================================
-   2️⃣ COLECCIÓN
+   GET COLECCIÓN (con filtros + paginación)
 ================================ */
 
-// GET todos
 router.get("/", (req, res) => {
-    res.status(200).json(spaceLaunches);
+
+    const query = {};
+
+    Object.keys(req.query).forEach(key => {
+
+        if (key !== "limit" && key !== "offset") {
+            query[key] = req.query[key];
+        }
+
+    });
+
+    let limit = parseInt(req.query.limit) || 0;
+    let offset = parseInt(req.query.offset) || 0;
+
+    db.find(query)
+        .skip(offset)
+        .limit(limit)
+        .exec((err, docs) => {
+
+            const cleanDocs = docs.map(d => {
+                delete d._id;
+                return d;
+            });
+
+            res.status(200).json(cleanDocs);
+
+        });
+
 });
 
-// POST crear
+/* ================================
+   GET RECURSO
+================================ */
+
+router.get("/:mission_id", (req, res) => {
+
+    const id = Number(req.params.mission_id);
+
+    db.findOne({ mission_id: id }, (err, doc) => {
+
+        if (!doc) {
+            return res.status(404).json({ error: "No encontrado" });
+        }
+
+        delete doc._id;
+
+        res.status(200).json(doc);
+
+    });
+
+});
+
+/* ================================
+   POST
+================================ */
+
 router.post("/", (req, res) => {
 
     const nuevo = req.body;
 
     if (!nuevo.mission_id || !nuevo.company_name) {
-        return res.status(400).json({ error: "mission_id y company_name son obligatorios" });
+        return res.status(400).json({ error: "Datos incompletos" });
     }
 
-    if (spaceLaunches.find(l => l.mission_id === Number(nuevo.mission_id))) {
-        return res.status(409).json({ error: "Ya existe ese mission_id" });
-    }
+    db.findOne({ mission_id: nuevo.mission_id }, (err, doc) => {
 
-    nuevo.mission_id = Number(nuevo.mission_id);
-    nuevo.year = Number(nuevo.year);
-    nuevo.latitude = Number(nuevo.latitude);
-    nuevo.longitude = Number(nuevo.longitude);
-    nuevo.cost = nuevo.cost ? Number(nuevo.cost) : null;
+        if (doc) {
+            return res.status(409).json({ error: "Ya existe ese recurso" });
+        }
 
-    spaceLaunches.push(nuevo);
-    saveCSV();
+        db.insert(nuevo, (err, newDoc) => {
 
-    res.status(201).json(nuevo);
-});
+            delete newDoc._id;
 
-// DELETE toda la colección
-router.delete("/", (req, res) => {
-    spaceLaunches = [];
-    saveCSV();
-    res.status(200).json({ message: "Colección borrada" });
+            res.status(201).json(newDoc);
+
+        });
+
+    });
+
 });
 
 /* ================================
-   3️⃣ RECURSO ÚNICO (mission_id)
+   PUT
 ================================ */
 
-// GET uno
-router.get("/:mission_id", (req, res) => {
-
-    const id = Number(req.params.mission_id);
-    const recurso = spaceLaunches.find(l => l.mission_id === id);
-
-    if (recurso) {
-        res.status(200).json(recurso);
-    } else {
-        res.status(404).json({ error: "No encontrado" });
-    }
-});
-
-// PUT actualizar
 router.put("/:mission_id", (req, res) => {
 
     const id = Number(req.params.mission_id);
-    const index = spaceLaunches.findIndex(l => l.mission_id === id);
 
-    if (req.body.mission_id && Number(req.body.mission_id) !== id) {
-        return res.status(400).json({ error: "mission_id no coincide con la URL" });
+    if (req.body.mission_id !== id) {
+        return res.status(400).json({ error: "ID no coincide con la URL" });
     }
 
-    if (index === -1) {
-        return res.status(404).json({ error: "No existe para actualizar" });
-    }
+    db.update(
+        { mission_id: id },
+        req.body,
+        {},
+        (err, numUpdated) => {
 
-    spaceLaunches[index] = {
-        ...spaceLaunches[index],
-        ...req.body,
-        mission_id: id
-    };
+            if (numUpdated === 0) {
+                return res.status(404).json({ error: "No existe" });
+            }
 
-    saveCSV();
+            res.sendStatus(200);
 
-    res.status(200).json(spaceLaunches[index]);
-});
+        }
+    );
 
-// DELETE uno
-router.delete("/:mission_id", (req, res) => {
-
-    const id = Number(req.params.mission_id);
-    const inicial = spaceLaunches.length;
-
-    spaceLaunches = spaceLaunches.filter(l => l.mission_id !== id);
-
-    if (spaceLaunches.length < inicial) {
-        saveCSV();
-        res.status(200).json({ message: "Eliminado correctamente" });
-    } else {
-        res.status(404).json({ error: "No existe para eliminar" });
-    }
 });
 
 /* ================================
-   4️⃣ MÉTODOS NO PERMITIDOS
+   DELETE UNO
 ================================ */
 
-router.post("/:mission_id", (req, res) => 
-    res.status(405).json({ error: "No se puede hacer POST a un recurso concreto" })
-);
+router.delete("/:mission_id", (req, res) => {
 
-router.put("/", (req, res) => 
-    res.status(405).json({ error: "No se puede hacer PUT a toda la colección" })
-);
+    const id = Number(req.params.mission_id);
+
+    db.remove({ mission_id: id }, {}, (err, numRemoved) => {
+
+        if (numRemoved === 0) {
+            return res.status(404).json({ error: "No existe" });
+        }
+
+        res.sendStatus(200);
+
+    });
+
+});
+
+/* ================================
+   DELETE COLECCIÓN
+================================ */
+
+router.delete("/", (req, res) => {
+
+    db.remove({}, { multi: true }, () => {
+
+        res.sendStatus(200);
+
+    });
+
+});
+
+/* ================================
+   MÉTODOS NO PERMITIDOS
+================================ */
+
+router.post("/:mission_id", (req, res) => res.sendStatus(405));
+router.put("/", (req, res) => res.sendStatus(405));
 
 module.exports = router;
