@@ -4,14 +4,23 @@
   "description": "SOS2526-14 Project",
   "main": "index.js",
   "type": "commonjs",
-  "scripts": {
-    "start": "node index.js",
-    "test": "npm run test-local",
-    "test-api-local": "npx newman run tests/api/api-tests.json -e tests/api/api-test-env-local.json",
-    "test-api-online": "npx newman run tests/api/api-tests.json -e tests/api/api-test-env-online.json",
-    "test-local": "start-server-and-test start http://localhost:3000 test-api-local",
-    "test-online": "start-server-and-test start http://localhost:3000 test-api-online"
-  },
+"scripts": {
+  "start": "node index.js",
+  
+  "test-jpc-local": "npx newman run tests/api/JPC/api-tests-JPC.json -e tests/api/JPC/api-test-env-local.json",
+  "test-jpc-render": "npx newman run tests/api/JPC/api-tests-JPC.json -e tests/api/JPC/api-test-env-render.json",
+  "test-jpc": "start-server-and-test start http://localhost:10000 test-jpc-local",
+
+  "test-frb-local": "npx newman run tests/api/FRB/api-tests-FRB.json -e tests/api/FRB/api-test-env-local.json",
+  "test-frb-render": "npx newman run tests/api/FRB/api-tests-FRB.json -e tests/api/FRB/api-test-env-render.json",
+  "test-frb": "start-server-and-test start http://localhost:10000 test-frb-local",
+
+  "test-jga-local": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-local.json",
+  "test-jga-render": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-render.json",
+  "test-jga": "start-server-and-test start http://localhost:10000 test-jga-local",
+
+  "test": "npm run test-jpc && npm run test-frb && npm run test-jga"
+},
   "dependencies": {
     "body-parser": "^2.2.2",
     "cool-ascii-faces": "^1.3.4",
