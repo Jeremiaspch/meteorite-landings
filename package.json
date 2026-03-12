@@ -5,7 +5,12 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "npm run test-local",
+    "test-api-local": "npx newman run tests/api/api-tests.json -e tests/api/api-test-env-local.json",
+    "test-api-online": "npx newman run tests/api/api-tests.json -e tests/api/api-test-env-online.json",
+    "test-local": "start-server-and-test start http://localhost:3000 test-api-local",
+    "test-online": "start-server-and-test start http://localhost:3000 test-api-online"
   },
   "dependencies": {
     "body-parser": "^2.2.2",
@@ -13,5 +18,8 @@
     "csv-parser": "^3.2.0",
     "csvtojson": "^2.0.14",
     "express": "^4.22.1"
+  },
+  "devDependencies": {
+    "start-server-and-test": "^2.1.5"
   }
 }
