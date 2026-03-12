@@ -2,119 +2,133 @@ const express = require("express");
 const router = express.Router();
 const path = require("path");
 const csv = require('csvtojson');
+const Datastore = require('@seald-io/nedb');
 
-const meteorite_csv = path.join(__dirname, "../data/meteorite-landings-with-country.csv");
+// 1. Configuración de rutas y DB
+// IMPORTANTE: Al estar en src/back/api, usamos ../../../ para llegar a la raíz
+const meteorite_csv = path.join(__dirname, "/../data/meteorite-landings-with-country.csv");
+const db = new Datastore({ filename: '/../data/meteoritos.db', autoload: true });
 
-// Array en memoria para gestionar los datos
-let meteorites = [];
-
-// Lista maestra de campos para validar POST y PUT
 const camposObligatorios = ["name", "id", "name_type", "class", "mass", "fall", "year", "latitude", "longitude", "geolocation", "country"];
 
 /* ============================================================
-    1. CARGA INICIAL (/loadInitialData) -> Código 201
+    1. CARGA INICIAL (/loadInitialData)
 ============================================================ */
 router.get("/loadInitialData", (req, res) => {
-    if (meteorites.length === 0) {
+    db.count({}, (err, count) => { 
+        if (err) return res.status(500).json({ error: "Error al consultar la DB" });
+        
+        if (count > 0) {
+            return res.status(400).json({ error: "La base de datos ya tiene datos." });
+        }
+
         csv().fromFile(meteorite_csv).then((datos) => {
-            meteorites = datos; 
-            res.status(201).json({ message: "Datos cargados correctamente", count: meteorites.length });
+            db.insert(datos, (err, newDocs) => {
+                if (err) return res.status(500).json({ error: "Error al insertar en DB" });
+                res.status(201).json({ message: "Datos cargados correctamente", count: newDocs.length });
+            });
         });
-    } else {
-        res.status(400).json({ error: "El array ya tiene datos." });
-    }
+    });
 });
 
 /* ============================================================
     2. COLECCIÓN (Lista completa)
 ============================================================ */
 
-// GET - Listar todos -> Código 200
+// GET - Listar todos
 router.get("/", (req, res) => {
-    res.status(200).json(meteorites);
+    db.find({}, { _id: 0 }, (err, docs) => {
+        if (err) return res.status(500).json({ error: "Error en la base de datos" });
+        res.status(200).json(docs);
+    });
 });
 
-// POST - Crear nuevo -> Códigos 201, 400, 409
+// POST - Crear nuevo
 router.post("/", (req, res) => {
     const nuevo = req.body;
 
-    // Comprobar si falta algún campo o está vacío
+    // Validación de campos
     const camposFaltantes = camposObligatorios.filter(campo => !nuevo.hasOwnProperty(campo) || nuevo[campo] === "");
-
     if (camposFaltantes.length > 0) {
-        return res.status(400).json({ error: "Faltan campos obligatorios", faltantes: camposFaltantes }); //
+        return res.status(400).json({ error: "Faltan campos obligatorios", faltantes: camposFaltantes });
     }
 
-    // Comprobar si ya existe (Conflict)
-    if (meteorites.find(m => m.name.toLowerCase() === nuevo.name.toLowerCase())) {
-        return res.status(409).json({ error: "Ese meteorito ya existe." }); //
-    } 
+    // Comprobar si ya existe en la DB
+    db.findOne({ name: nuevo.name }, (err, doc) => {
+        if (doc) return res.status(409).json({ error: "Ese meteorito ya existe." });
 
-    meteorites.push(nuevo);
-    res.status(201).json(nuevo); //
+        db.insert(nuevo, (err, docInsertado) => {
+            if (err) return res.status(500).json({ error: "Error al guardar" });
+            const { _id, ...docSinId } = docInsertado; // Quitamos el _id de NeDB para la respuesta
+            res.status(201).json(docSinId);
+        });
+    });
 });
 
-// DELETE - Borrar todo -> Código 200
+// DELETE - Borrar todo
 router.delete("/", (req, res) => {
-    meteorites = [];
-    res.status(200).json({ message: "Colección borrada correctamente." });
+    db.remove({}, { multi: true }, (err, numRemoved) => {
+        if (err) return res.status(500).json({ error: "Error al borrar" });
+        res.status(200).json({ message: `Colección borrada. ${numRemoved} recursos eliminados.` });
+    });
 });
 
 /* ============================================================
     3. RECURSO ÚNICO (Por nombre)
 ============================================================ */
 
-// GET - Un solo meteorito -> Código 200, 404
+// GET - Un solo meteorito
 router.get("/:name", (req, res) => {
-    const recurso = meteorites.find(m => m.name.toLowerCase() === req.params.name.toLowerCase());
-    if (recurso) {
-        res.status(200).json(recurso);
-    } else {
-        res.status(404).json({ error: "Meteorito no encontrado." }); //
-    }
+    const nameParam = req.params.name;
+    // Usamos expresión regular para que no importe mayúsculas/minúsculas
+    db.findOne({ name: new RegExp(`^${nameParam}$`, 'i') }, { _id: 0 }, (err, doc) => {
+        if (doc) {
+            res.status(200).json(doc);
+        } else {
+            res.status(404).json({ error: "Meteorito no encontrado." });
+        }
+    });
 });
 
-// PUT - Actualizar -> Código 200, 400, 404
+// PUT - Actualizar
 router.put("/:name", (req, res) => {
-    const nameParam = req.params.name.toLowerCase();
-    const index = meteorites.findIndex(m => m.name.toLowerCase() === nameParam);
+    const nameParam = req.params.name;
     const nuevoDato = req.body;
 
-    // 1. El nombre de la URL y del JSON deben coincidir
-    if (nuevoDato.name && nuevoDato.name.toLowerCase() !== nameParam) {
+    if (nuevoDato.name && nuevoDato.name.toLowerCase() !== nameParam.toLowerCase()) {
         return res.status(400).json({ error: "El nombre no coincide con la URL." });
     }
 
-    // 2. Comprobar que se envían TODOS los campos necesarios para actualizar
     const camposFaltantes = camposObligatorios.filter(campo => !nuevoDato.hasOwnProperty(campo));
     if (camposFaltantes.length > 0) {
-        return res.status(400).json({ error: "Debe enviar todos los campos para actualizar el recurso.", faltantes: camposFaltantes });
+        return res.status(400).json({ error: "Debe enviar todos los campos.", faltantes: camposFaltantes });
     }
 
-    if (index !== -1) {
-        meteorites[index] = nuevoDato;
-        res.status(200).json(meteorites[index]);
-    } else {
-        res.status(404).json({ error: "No existe para actualizar." });
-    }
+    db.update({ name: new RegExp(`^${nameParam}$`, 'i') }, nuevoDato, {}, (err, numReplaced) => {
+        if (numReplaced === 0) {
+            res.status(404).json({ error: "No existe para actualizar." });
+        } else {
+            res.status(200).json(nuevoDato);
+        }
+    });
 });
 
-// DELETE - Borrar uno -> Código 200, 404
+// DELETE - Borrar uno
 router.delete("/:name", (req, res) => {
-    const inicial = meteorites.length;
-    meteorites = meteorites.filter(m => m.name.toLowerCase() !== req.params.name.toLowerCase());
-    
-    if (meteorites.length < inicial) {
-        res.status(200).json({ message: "Eliminado correctamente." });
-    } else {
-        res.status(404).json({ error: "No existe para eliminar." });
-    }
+    const nameParam = req.params.name;
+    db.remove({ name: new RegExp(`^${nameParam}$`, 'i') }, {}, (err, numRemoved) => {
+        if (numRemoved === 0) {
+            res.status(404).json({ error: "No existe para eliminar." });
+        } else {
+            res.status(200).json({ message: "Eliminado correctamente." });
+        }
+    });
 });
 
 /* ============================================================
-    4. MÉTODOS NO PERMITIDOS (405) -
+    4. MÉTODOS NO PERMITIDOS
 ============================================================ */
-router.post("/:name", (req, res) => res.status(405).json({ error: "POST no permitido en recurso concreto." }));
-router.put("/", (req, res) => res.status(405).json({ error: "PUT no permitido en la colección." }));
+router.post("/:name", (req, res) => res.status(405).json({ error: "Método no permitido." }));
+router.put("/", (req, res) => res.status(405).json({ error: "Método no permitido." }));
 
 module.exports = router;
