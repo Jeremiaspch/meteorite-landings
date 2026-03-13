@@ -37,7 +37,7 @@ function validarMeteorito(req, res, next) {
 ============================================================ */
 router.get("/docs", (req, res) => {
     // IMPORTANTE: Sustituye este enlace por tu URL pública de Postman
-    res.redirect("https://documenter.getpostman.com/view/AQUI_TU_ID_DE_POSTMAN");
+    res.redirect("https://documenter.getpostman.com/view/52378516/2sBXiertzB");
 });
 
 /* ============================================================
