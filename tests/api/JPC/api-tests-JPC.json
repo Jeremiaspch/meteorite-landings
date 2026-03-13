@@ -8,7 +8,60 @@
   },
   "item": [
     {
-      "name": "GET/meteorite-landings -200",
+      "name": "DELETE/meteorite-landings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET/meteorite-landings -200 []",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Devuelve un Array vacío\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(Array.isArray(jsonData)).to.be.true;\r",
+              "    pm.expect(jsonData.length).to.eql(0);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -22,31 +75,26 @@
       "response": []
     },
     {
-      "name": "GET/meteorite-landings/Santiago -404",
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}"
-        },
-        "url": {
-          "raw": "{{base-url}}{{api}}meteorite-landings/Santiago",
-          "host": [
-            "{{base-url}}{{api}}meteorite-landings"
-          ],
-          "path": [
-            "Santiago"
-          ]
+      "name": "GET/loadInitialData - 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "pm.test(\"Tiene mensaje de carga\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.message).to.eql(\"Datos cargados correctamente\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
         }
-      },
-      "response": []
-    },
-    {
-      "name": "GET/loadInitialData",
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -63,7 +111,152 @@
       "response": []
     },
     {
+      "name": "GET/meteorite-landings - Lleno",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Devuelve un Array lleno\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(Array.isArray(jsonData)).to.be.true;\r",
+              "    pm.expect(jsonData.length).to.be.above(0); // Comprueba que hay más de 0\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET/meteorite-landings/Chile/Santiago -404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings/Chile/Santiago",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ],
+          "path": [
+            "Chile",
+            "Santiago"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET/meteorite-landings/Belgium/Aachen - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Devuelve un objeto (recurso único)\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(typeof jsonData).to.eql(\"object\");\r",
+              "    pm.expect(Array.isArray(jsonData)).to.be.false; // Asegura que NO es un array\r",
+              "    pm.expect(jsonData.name).to.eql(\"Aachen\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings/Belgium/Aachen",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ],
+          "path": [
+            "Belgium",
+            "Aachen"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "POST/meteorite-landings - 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -86,7 +279,28 @@
       "response": []
     },
     {
-      "name": "POST/meteorite-landings - 201 / 409 Mairena",
+      "name": "POST/meteorite-landings - 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "pm.test(\"No devuelve la propiedad _id y devuelve el objeto\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(typeof jsonData).to.eql(\"object\");\r",
+              "    pm.expect(jsonData).to.not.have.property('_id'); // ¡El check del profesor!\r",
+              "    pm.expect(jsonData.name).to.eql(\"Mairena\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -109,7 +323,22 @@
       "response": []
     },
     {
-      "name": "POST/meteorite-landings - 405",
+      "name": "POST/meteorite-landings - 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -123,19 +352,78 @@
           }
         },
         "url": {
-          "raw": "{{base-url}}{{api}}meteorite-landings/Aachen",
+          "raw": "{{base-url}}{{api}}meteorite-landings",
           "host": [
             "{{base-url}}{{api}}meteorite-landings"
-          ],
-          "path": [
-            "Aachen"
           ]
         }
       },
       "response": []
     },
     {
-      "name": "PUT/meteorite-landings/Mairena",
+      "name": "POST/meteorite-landings/Spain/Mairena - 405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings/Spain/Mairena",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ],
+          "path": [
+            "Spain",
+            "Mairena"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT/meteorite-landings/Spain/Mairena - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Devuelve el objeto actualizado sin _id\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(typeof jsonData).to.eql(\"object\");\r",
+              "    pm.expect(jsonData).to.not.have.property('_id');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
@@ -149,11 +437,54 @@
           }
         },
         "url": {
-          "raw": "{{base-url}}{{api}}meteorite-landings/Mairena",
+          "raw": "{{base-url}}{{api}}meteorite-landings/Spain/Mairena",
           "host": [
             "{{base-url}}{{api}}meteorite-landings"
           ],
           "path": [
+            "Spain",
+            "Mairena"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT/meteorite-landings/Spain/Mairena - 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\",\r\n    \"basura\": \"Spain\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings/Spain/Mairena",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ],
+          "path": [
+            "Spain",
             "Mairena"
           ]
         }
@@ -162,6 +493,21 @@
     },
     {
       "name": "PUT/meteorite-landings - 405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
@@ -184,25 +530,73 @@
       "response": []
     },
     {
-      "name": "PUT/meteorite-landings - 400",
+      "name": "DEL/meteorite-landings/Spain/Mairena - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
-        "method": "PUT",
+        "method": "DELETE",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
+          "raw": ""
         },
         "url": {
-          "raw": "{{base-url}}{{api}}meteorite-landings/Santiago",
+          "raw": "{{base-url}}{{api}}meteorite-landings/Spain/Mairena",
           "host": [
             "{{base-url}}{{api}}meteorite-landings"
           ],
           "path": [
+            "Spain",
+            "Mairena"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DEL/meteorite-landings/Chile/Santiago - 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{base-url}}{{api}}meteorite-landings/Chile/Santiago",
+          "host": [
+            "{{base-url}}{{api}}meteorite-landings"
+          ],
+          "path": [
+            "Chile",
             "Santiago"
           ]
         }
@@ -210,34 +604,28 @@
       "response": []
     },
     {
-      "name": "DELETE/meteorite-landings/Aachen",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}"
-        },
-        "url": {
-          "raw": "{{base-url}}{{api}}meteorite-landings/Aachen",
-          "host": [
-            "{{base-url}}{{api}}meteorite-landings"
-          ],
-          "path": [
-            "Aachen"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "DELETE/meteorite-landings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}"
+          "raw": ""
         },
         "url": {
           "raw": "{{base-url}}{{api}}meteorite-landings",
