@@ -69,7 +69,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"500\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -92,7 +92,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"500\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -115,7 +115,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"500\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -141,7 +141,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 10000,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -167,7 +167,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -190,7 +190,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": \"9999\",\r\n    \"name_type\": \"Valid\",\r\n    \"class\": \"L5\",\r\n    \"mass\": \"700\",\r\n    \"fall\": \"Fell\",\r\n    \"year\": \"2024.0\",\r\n    \"latitude\": \"37.33\",\r\n    \"longitude\": \"-6.06\",\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
+          "raw": "{\r\n    \"name\": \"Mairena\",\r\n    \"id\": 9999,\r\n    \"mass\": 700,\r\n    \"year\": 2024,\r\n    \"geolocation\": \"(37.33, -6.06)\",\r\n    \"country\": \"Spain\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
