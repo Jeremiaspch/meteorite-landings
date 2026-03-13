@@ -4,8 +4,6 @@ const path = require("path");
 const csv = require('csvtojson');
 const Datastore = require('@seald-io/nedb');
 
-// 1. Configuración de rutas y DB
-// IMPORTANTE: Al estar en src/back/api, usamos ../../../ para llegar a la raíz
 const meteorite_csv = path.join(__dirname, "/../data/meteorite-landings-with-country.csv");
 const db = new Datastore({ 
     filename: path.join(process.cwd(), "data", "meteoritos.db"), 
@@ -15,7 +13,6 @@ const db = new Datastore({
 // Nos quedamos solo con los datos que aportan valor real a la API
 const camposObligatorios = ["name", "id", "mass", "year", "geolocation", "country"];
 
-// Nuestro Middleware de validación
 function validarMeteorito(req, res, next) {
     const dato = req.body;
 
@@ -25,7 +22,7 @@ function validarMeteorito(req, res, next) {
         return res.status(400).json({ error: "Faltan campos obligatorios o están vacíos", faltantes: camposFaltantes });
     }
 
-    // 2. Comprobar campos extra (basura)
+    // 2. Comprobar campos extra (basura o intentos de inyectar _id)
     const camposExtra = Object.keys(dato).filter(campo => !camposObligatorios.includes(campo));
     if (camposExtra.length > 0) {
         return res.status(400).json({ error: "Se han enviado campos no permitidos", extra: camposExtra });
@@ -34,6 +31,14 @@ function validarMeteorito(req, res, next) {
     // Si todo está perfecto, pasamos a la ruta real
     next();
 }
+
+/* ============================================================
+    DOCUMENTACIÓN (/docs) -> Requisito L06
+============================================================ */
+router.get("/docs", (req, res) => {
+    // IMPORTANTE: Sustituye este enlace por tu URL pública de Postman
+    res.redirect("https://documenter.getpostman.com/view/AQUI_TU_ID_DE_POSTMAN");
+});
 
 /* ============================================================
     1. CARGA INICIAL (/loadInitialData)
@@ -47,7 +52,7 @@ router.get("/loadInitialData", (req, res) => {
         }
 
         csv().fromFile(meteorite_csv).then((datos) => {
-            // Mapeamos y limpiamos los datos antes de guardarlos
+            // Mapeamos y limpiamos los datos para quedarnos solo con las 6 columnas elegidas
             const datosLimpios = datos.map(m => ({
                 name: m.name,
                 id: Number(m.id),
@@ -69,34 +74,29 @@ router.get("/loadInitialData", (req, res) => {
     2. COLECCIÓN (Lista completa con Búsqueda y Paginación)
 ============================================================ */
 router.get("/", (req, res) => {
-    // 1. Extraer parámetros de paginación (si no vienen, por defecto son 0)
-    let limit = parseInt(req.query.limit) || 0;  // 0 en NeDB significa "sin límite"
-    let offset = parseInt(req.query.offset) || 0; // Cuántos resultados me salto
+    // Extraer parámetros de paginación
+    let limit = parseInt(req.query.limit) || 0; 
+    let offset = parseInt(req.query.offset) || 0; 
 
-    // 2. Construir el objeto de búsqueda dinámico
+    // Construir el objeto de búsqueda dinámico
     let searchQuery = {};
 
     Object.keys(req.query).forEach(key => {
-        // Ignoramos limit y offset porque no son campos de la base de datos
         if (key !== "limit" && key !== "offset") {
-            
-            // Si el campo es numérico (como year o mass), lo convertimos a número
             if (key === "year" || key === "mass" || key === "id") {
                 searchQuery[key] = Number(req.query[key]);
             } else {
-                // Si es texto (name, country, class), búsqueda exacta sin importar mayúsculas
                 searchQuery[key] = new RegExp(`^${req.query[key]}$`, 'i');
             }
         }
     });
 
-    // 3. Ejecutar la búsqueda en NeDB con paginación
+    // Buscar filtrando el _id autogenerado de NeDB
     db.find(searchQuery, { _id: 0 })
       .skip(offset)
       .limit(limit)
       .exec((err, docs) => {
           if (err) return res.status(500).json({ error: "Error en la base de datos" });
-          
           res.status(200).json(docs);
       });
 });
@@ -105,13 +105,13 @@ router.get("/", (req, res) => {
 router.post("/", validarMeteorito, (req, res) => {
     const nuevo = req.body;
 
-    // Comprobar si ya existe en la DB
-    db.findOne({ name: nuevo.name }, (err, doc) => {
+    // Comprobar si ya existe en la DB (por nombre)
+    db.findOne({ name: new RegExp(`^${nuevo.name}$`, 'i') }, (err, doc) => {
         if (doc) return res.status(409).json({ error: "Ese meteorito ya existe." });
 
         db.insert(nuevo, (err, docInsertado) => {
             if (err) return res.status(500).json({ error: "Error al guardar" });
-            const { _id, ...docSinId } = docInsertado; // Quitamos el _id de NeDB para la respuesta
+            const { _id, ...docSinId } = docInsertado; // Quitamos el _id de la respuesta
             res.status(201).json(docSinId);
         });
     });
@@ -126,14 +126,18 @@ router.delete("/", (req, res) => {
 });
 
 /* ============================================================
-    3. RECURSO ÚNICO (Por nombre)
+    3. RECURSO ÚNICO (Identificador Compuesto: /:country/:name)
 ============================================================ */
 
 // GET - Un solo meteorito
-router.get("/:name", (req, res) => {
+router.get("/:country/:name", (req, res) => {
+    const countryParam = req.params.country;
     const nameParam = req.params.name;
-    // Usamos expresión regular para que no importe mayúsculas/minúsculas
-    db.findOne({ name: new RegExp(`^${nameParam}$`, 'i') }, { _id: 0 }, (err, doc) => {
+    
+    db.findOne({ 
+        country: new RegExp(`^${countryParam}$`, 'i'),
+        name: new RegExp(`^${nameParam}$`, 'i') 
+    }, { _id: 0 }, (err, doc) => {
         if (doc) {
             res.status(200).json(doc);
         } else {
@@ -143,32 +147,43 @@ router.get("/:name", (req, res) => {
 });
 
 // PUT - Actualizar
-router.put("/:name", validarMeteorito, (req, res) => {
+router.put("/:country/:name", validarMeteorito, (req, res) => {
+    const countryParam = req.params.country;
     const nameParam = req.params.name;
     const nuevoDato = req.body;
 
-    if (nuevoDato.name && nuevoDato.name.toLowerCase() !== nameParam.toLowerCase()) {
-        return res.status(400).json({ error: "El nombre no coincide con la URL." });
+    // El nombre y país del JSON deben coincidir con los de la URL
+    if (nuevoDato.name.toLowerCase() !== nameParam.toLowerCase() || 
+        nuevoDato.country.toLowerCase() !== countryParam.toLowerCase()) {
+        return res.status(400).json({ error: "El nombre o país del cuerpo no coincide con la URL." });
     }
 
-    const camposFaltantes = camposObligatorios.filter(campo => !nuevoDato.hasOwnProperty(campo));
-    if (camposFaltantes.length > 0) {
-        return res.status(400).json({ error: "Debe enviar todos los campos.", faltantes: camposFaltantes });
-    }
-
-    db.update({ name: new RegExp(`^${nameParam}$`, 'i') }, nuevoDato, {}, (err, numReplaced) => {
-        if (numReplaced === 0) {
-            res.status(404).json({ error: "No existe para actualizar." });
-        } else {
-            res.status(200).json(nuevoDato);
+    db.update(
+        { 
+            country: new RegExp(`^${countryParam}$`, 'i'),
+            name: new RegExp(`^${nameParam}$`, 'i') 
+        }, 
+        nuevoDato, 
+        {}, 
+        (err, numReplaced) => {
+            if (numReplaced === 0) {
+                res.status(404).json({ error: "No existe para actualizar." });
+            } else {
+                res.status(200).json(nuevoDato);
+            }
         }
-    });
+    );
 });
 
 // DELETE - Borrar uno
-router.delete("/:name", (req, res) => {
+router.delete("/:country/:name", (req, res) => {
+    const countryParam = req.params.country;
     const nameParam = req.params.name;
-    db.remove({ name: new RegExp(`^${nameParam}$`, 'i') }, {}, (err, numRemoved) => {
+
+    db.remove({ 
+        country: new RegExp(`^${countryParam}$`, 'i'),
+        name: new RegExp(`^${nameParam}$`, 'i') 
+    }, {}, (err, numRemoved) => {
         if (numRemoved === 0) {
             res.status(404).json({ error: "No existe para eliminar." });
         } else {
@@ -180,7 +195,7 @@ router.delete("/:name", (req, res) => {
 /* ============================================================
     4. MÉTODOS NO PERMITIDOS
 ============================================================ */
-router.post("/:name", (req, res) => res.status(405).json({ error: "Método no permitido." }));
+router.post("/:country/:name", (req, res) => res.status(405).json({ error: "Método no permitido." }));
 router.put("/", (req, res) => res.status(405).json({ error: "Método no permitido." }));
 
 module.exports = router;
