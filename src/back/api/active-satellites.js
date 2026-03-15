@@ -15,11 +15,6 @@ function hasCorrectStructure(obj) {
     return fields.length === keys.length && fields.every(f => keys.includes(f));
 }
 
-
-router.get("/docs", (req, res) => {
-    // IMPORTANTE: Sustituye este enlace por tu URL pública de Postman
-    res.redirect("https://documenter.getpostman.com/view/52241995/2sBXigMZ5R");
-});
 // 1. CARGA INICIAL
 router.get("/loadInitialData", (req, res) => {
     db.count({}, (err, count) => {
@@ -76,4 +71,78 @@ router.post("/", (req, res) => {
     });
 });
 
-// DELETE Colección
+// DELETE Colección (Borrar todo)
+router.delete("/", (req, res) => {
+    db.remove({}, { multi: true }, (err, numRemoved) => {
+        if (err) return res.status(500).json({ message: "Error al borrar." });
+        res.status(200).json({ message: `Colección borrada. ${numRemoved} recursos eliminados.` });
+    });
+});
+
+/* ============================================================
+    RECURSO CONCRETO (Acciones sobre /:country/:name ) -> Siempre OBJETO en GET
+============================================================ */
+
+// GET Recurso concreto
+router.get("/:country/:name", (req, res) => {
+    db.findOne({ 
+        country: new RegExp('^' + req.params.country + '$', "i"), 
+        name: new RegExp('^' + req.params.name + '$', "i") 
+    }, { _id: 0 }, (err, doc) => {
+        if (err) return res.status(500).json({ message: "Error al buscar." });
+        if (!doc) return res.status(404).json({ message: "Recurso no encontrado." });
+        res.status(200).json(doc); // Devuelve { }
+    });
+});
+
+// PUT Recurso concreto (Actualizar)
+router.put("/:country/:name", (req, res) => {
+    // Validar que el cuerpo es correcto y coincide con los IDs de la URL
+    if (!hasCorrectStructure(req.body) || 
+        req.body.name.toLowerCase() !== req.params.name.toLowerCase() || 
+        req.body.country.toLowerCase() !== req.params.country.toLowerCase()) {
+        return res.status(400).json({ message: "Cuerpo inválido o no coincide con la URL." });
+    }
+    
+    db.update({ 
+        country: new RegExp('^' + req.params.country + '$', "i"), 
+        name: new RegExp('^' + req.params.name + '$', "i") 
+    }, req.body, {}, (err, num) => {
+        if (err) return res.status(500).json({ message: "Error al actualizar." });
+        if (num === 0) return res.status(404).json({ message: "Recurso no encontrado para actualizar." });
+        res.status(200).json({ message: "Recurso actualizado correctamente." });
+    });
+});
+
+// DELETE Recurso concreto (Borrar uno)
+router.delete("/:country/:name", (req, res) => {
+    db.remove({ 
+        country: new RegExp('^' + req.params.country + '$', "i"), 
+        name: new RegExp('^' + req.params.name + '$', "i") 
+    }, {}, (err, numRemoved) => {
+        if (err) return res.status(500).json({ message: "Error al borrar." });
+        if (numRemoved === 0) return res.status(404).json({ message: "No encontrado." });
+        res.status(200).json({ message: "Recurso eliminado correctamente." });
+    });
+});
+
+/* ============================================================
+    CONTROL DE ERRORES Y MÉTODOS NO PERMITIDOS
+============================================================ */
+
+// POST a un recurso concreto (405)
+router.post("/:country/:name", (req, res) => {
+    res.status(405).json({ message: "POST no permitido en recurso concreto." });
+});
+
+// PUT a la colección (405)
+router.put("/", (req, res) => {
+    res.status(405).json({ message: "PUT no permitido en la colección." });
+});
+
+// Catch-all para cualquier otra ruta (Evita el HTML 404 de Express)
+router.use((req, res) => {
+    res.status(404).json({ message: "Ruta no encontrada." });
+});
+
+module.exports = router;
