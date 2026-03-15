@@ -6,6 +6,30 @@
   },
   "item": [
     {
+      "name": "DELETE-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites",
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites"]
+        }
+      }
+    },
+    {
       "name": "GET datos",
       "event": [
         {
