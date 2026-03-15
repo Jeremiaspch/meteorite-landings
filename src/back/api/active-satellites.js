@@ -41,46 +41,6 @@ router.get("/docs", (req, res) => {
 /* ================================
     2. COLECCIÓN (Lista completa)
 ================================ */
-
-// GET - Listar todos
-router.get("/", (req, res) => {
-    db.find({}, (err, satellites) => {
-        if (err) return res.sendStatus(500);
-        // Limpiamos el _id de NeDB para la respuesta
-        const output = satellites.map(s => { delete s._id; return s; });
-        res.status(200).json(output);
-    });
-});
-
-// POST - Crear nuevo
-router.post("/", (req, res) => {
-    const nuevo = req.body;
-    if (!nuevo.name || !nuevo.country) {
-        return res.status(400).json({ error: "Campos obligatorios faltantes." });
-    }
-
-    // Comprobar duplicados (insensible a mayúsculas usando Regex)
-    db.findOne({ name: new RegExp('^' + nuevo.name + '$', "i") }, (err, satellite) => {
-        if (err) return res.sendStatus(500);
-        if (satellite) {
-            res.status(409).json({ error: "Ese satélite ya existe." });
-        } else {
-            db.insert(nuevo, (err) => {
-                if (err) return res.sendStatus(500);
-                res.status(201).json(nuevo);
-            });
-        }
-    });
-});
-
-// DELETE - Borrar toda la colección
-router.delete("/", (req, res) => {
-    db.remove({}, { multi: true }, (err, numRemoved) => {
-        if (err) return res.sendStatus(500);
-        res.status(200).json({ message: `Colección borrada (${numRemoved} registros).` });
-    });
-});
-
 // GET - Listar todos con filtros y paginación
 router.get("/", (req, res) => {
     // 1. Extraemos parámetros de paginación (con valores por defecto)
@@ -121,6 +81,37 @@ router.get("/", (req, res) => {
         });
 
         res.status(200).json(output);
+    });
+});
+
+
+
+// POST - Crear nuevo
+router.post("/", (req, res) => {
+    const nuevo = req.body;
+    if (!nuevo.name || !nuevo.country) {
+        return res.status(400).json({ error: "Campos obligatorios faltantes." });
+    }
+
+    // Comprobar duplicados (insensible a mayúsculas usando Regex)
+    db.findOne({ name: new RegExp('^' + nuevo.name + '$', "i") }, (err, satellite) => {
+        if (err) return res.sendStatus(500);
+        if (satellite) {
+            res.status(409).json({ error: "Ese satélite ya existe." });
+        } else {
+            db.insert(nuevo, (err) => {
+                if (err) return res.sendStatus(500);
+                res.status(201).json(nuevo);
+            });
+        }
+    });
+});
+
+// DELETE - Borrar toda la colección
+router.delete("/", (req, res) => {
+    db.remove({}, { multi: true }, (err, numRemoved) => {
+        if (err) return res.sendStatus(500);
+        res.status(200).json({ message: `Colección borrada (${numRemoved} registros).` });
     });
 });
 
