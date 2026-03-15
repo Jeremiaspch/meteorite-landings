@@ -1,0 +1,394 @@
+{
+  "info": {
+    "_postman_id": "c349ea48-30d9-456e-8e0a-dedc01306ff4",
+    "name": "L06",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52241995",
+    "_collection_link": "https://go.postman.co/collection/52241995-c349ea48-30d9-456e-8e0a-dedc01306ff4?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "GET datos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/loadInitialData",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET-200",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Ejemplo\",\r\n\"country\":\"Multinational\",\r\n\"launch_date\":\"2015-03-02\",\r\n\"launch_mass\":\"2000.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35803.0\",\"perigee_height\":\"35788.0\"}\r\n"
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get recurso-200",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/?name=Alfa Crux",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            ""
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "Alfa Crux"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET recurso no existente 404",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellit",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE-200",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET datos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/loadInitialData",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete recurso-200",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/1HOPSAT-TD",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "1HOPSAT-TD"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete recurso NOT FOUND-404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/1HOPSAT-TD",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "1HOPSAT-TD"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST recurso concreto-405",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Ejemplo\",\r\n\"country\":\"Multinational\",\r\n\"launch_date\":\"2015-03-02\",\r\n\"launch_mass\":\"2000.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35803.0\",\"perigee_height\":\"35788.0\"}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/SAT",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "SAT"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST 201",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Ejemplo\",\r\n\"country\":\"Multinational\",\r\n\"launch_date\":\"2015-03-02\",\r\n\"launch_mass\":\"2000.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35803.0\",\"perigee_height\":\"35788.0\"}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST 409",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"ABS-2\",\"country\":\"España\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Put correcto-200",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"ABS-2\",\"country\":\"España\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/ABS-2",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "ABS-2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Put a toda la lista 405",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"ABS-2\",\"country\":\"España\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT 400",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"ADLER-2\",\"country\":\"Austria\",\"launch_date\":\"2023-04-15\",\"launch_mass\":\"11.5\",\"expected_lifetime\":\"\",\"apogee_height\":\"506.0\",\"perigee_height\":\"497.0\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/ABS-2",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "ABS-2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT campos incorrectos 400",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"ADLER-2\",\"country\":\"Austria\",\"launch_date\":\"2023-04-15\",\"launch_mass\":\"11.5\",\"expected_lifetime\":\"\",,\"perigee_height\":\"497.0\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Render}}/api/v1/active-satellites/ABS-2",
+          "host": [
+            "{{Render}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "active-satellites",
+            "ABS-2"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
