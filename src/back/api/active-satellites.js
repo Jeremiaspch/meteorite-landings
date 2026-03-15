@@ -31,6 +31,13 @@ router.get("/loadInitialData", (req, res) => {
     });
 });
 
+/* ============================================================
+    DOCUMENTACIÓN (/docs) -> Requisito L06
+============================================================ */
+router.get("/docs", (req, res) => {
+    
+    res.redirect("https://documenter.getpostman.com/view/52241995/2sBXigMZ5R");
+});
 /* ================================
     2. COLECCIÓN (Lista completa)
 ================================ */
