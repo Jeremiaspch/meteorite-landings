@@ -60,7 +60,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites/?name=Alfa Crux",
+          "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
           "host": [
             "{{Render}}"
           ],
@@ -68,13 +68,8 @@
             "api",
             "v1",
             "active-satellites",
-            ""
-          ],
-          "query": [
-            {
-              "key": "name",
-              "value": "Alfa Crux"
-            }
+            "Taiwan",
+            "COSMIC-B"
           ]
         }
       },
@@ -156,7 +151,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites/1HOPSAT-TD",
+          "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
           "host": [
             "{{Render}}"
           ],
@@ -164,7 +159,8 @@
             "api",
             "v1",
             "active-satellites",
-            "1HOPSAT-TD"
+            "Taiwan",
+            "COSMIC-B"
           ]
         }
       },
@@ -205,7 +201,7 @@
           }
         },
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites/SAT",
+          "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
           "host": [
             "{{Render}}"
           ],
@@ -213,7 +209,8 @@
             "api",
             "v1",
             "active-satellites",
-            "SAT"
+            "Taiwan",
+            "COSMIC-B"
           ]
         }
       },
@@ -254,7 +251,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\"name\":\"ABS-2\",\"country\":\"España\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
+          "raw": "{\"name\":\"Baoyun\",\"country\":\"China\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
           "options": {
             "raw": {
               "language": "json"
@@ -262,14 +259,15 @@
           }
         },
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites",
+          "raw": "{{Render}}/api/v1/active-satellites/",
           "host": [
             "{{Render}}"
           ],
           "path": [
             "api",
             "v1",
-            "active-satellites"
+            "active-satellites",
+            ""
           ]
         }
       },
@@ -282,7 +280,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\"name\":\"ABS-2\",\"country\":\"España\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
+          "raw": "{\"name\":\"GOES-13\",\"country\":\"USA\",\"launch_date\":\"2014-02-06\",\"launch_mass\":\"6330.0\",\"expected_lifetime\":\"15.0\",\"apogee_height\":\"35793.0\",\"perigee_height\":\"35778.0\"}",
           "options": {
             "raw": {
               "language": "json"
@@ -290,7 +288,7 @@
           }
         },
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites/ABS-2",
+          "raw": "{{Render}}/api/v1/active-satellites/USA/GOES-13",
           "host": [
             "{{Render}}"
           ],
@@ -298,7 +296,8 @@
             "api",
             "v1",
             "active-satellites",
-            "ABS-2"
+            "USA",
+            "GOES-13"
           ]
         }
       },
@@ -347,7 +346,7 @@
           }
         },
         "url": {
-          "raw": "{{Render}}/api/v1/active-satellites/ABS-2",
+          "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
           "host": [
             "{{Render}}"
           ],
@@ -355,7 +354,8 @@
             "api",
             "v1",
             "active-satellites",
-            "ABS-2"
+            "Taiwan",
+            "COSMIC-B"
           ]
         }
       },
