@@ -9,26 +9,45 @@
   "item": [
     {
       "name": "GET datos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 o 201\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/loadInitialData",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "loadInitialData"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "loadInitialData"]
         }
       },
       "response": []
     },
     {
       "name": "GET-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "protocolProfileBehavior": {
         "disableBodyPruning": true
       },
@@ -41,42 +60,53 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            ""
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", ""]
         }
       },
       "response": []
     },
     {
       "name": "Get recurso-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "Taiwan",
-            "COSMIC-B"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "Taiwan", "COSMIC-B"]
         }
       },
       "response": []
     },
     {
       "name": "GET recurso no existente 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "protocolProfileBehavior": {
         "disableBodyPruning": true
       },
@@ -94,100 +124,131 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellit",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellit"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellit"]
         }
       },
       "response": []
     },
     {
       "name": "DELETE-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 o 204\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites"]
         }
       },
       "response": []
     },
     {
       "name": "GET datos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/loadInitialData",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "loadInitialData"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "loadInitialData"]
         }
       },
       "response": []
     },
     {
       "name": "Delete recurso-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "Taiwan",
-            "COSMIC-B"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "Taiwan", "COSMIC-B"]
         }
       },
       "response": []
     },
     {
       "name": "Delete recurso NOT FOUND-404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/1HOPSAT-TD",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "1HOPSAT-TD"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "1HOPSAT-TD"]
         }
       },
       "response": []
     },
     {
       "name": "POST recurso concreto-405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {",
+              "    pm.response.to.have.status(405);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -202,22 +263,27 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "Taiwan",
-            "COSMIC-B"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "Taiwan", "COSMIC-B"]
         }
       },
       "response": []
     },
     {
       "name": "POST 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -232,20 +298,27 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites"]
         }
       },
       "response": []
     },
     {
       "name": "POST 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -260,21 +333,27 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            ""
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", ""]
         }
       },
       "response": []
     },
     {
       "name": "Put correcto-200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
@@ -289,22 +368,27 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/USA/GOES-13",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "USA",
-            "GOES-13"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "USA", "GOES-13"]
         }
       },
       "response": []
     },
     {
       "name": "Put a toda la lista 405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {",
+              "    pm.response.to.have.status(405);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
@@ -319,20 +403,27 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites"]
         }
       },
       "response": []
     },
     {
       "name": "PUT 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
@@ -347,16 +438,8 @@
         },
         "url": {
           "raw": "{{Render}}/api/v1/active-satellites/Taiwan/COSMIC-B",
-          "host": [
-            "{{Render}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "active-satellites",
-            "Taiwan",
-            "COSMIC-B"
-          ]
+          "host": ["{{Render}}"],
+          "path": ["api", "v1", "active-satellites", "Taiwan", "COSMIC-B"]
         }
       },
       "response": []
