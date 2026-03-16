@@ -8,14 +8,14 @@
     "start": "node index.js",
     "test-jpc-local": "npx newman run tests/api/JPC/api-tests-JPC.json -e tests/api/JPC/api-test-env-local.json",
     "test-jpc-render": "npx newman run tests/api/JPC/api-tests-JPC.json -e tests/api/JPC/api-test-env-render.json",
-    "test-jpc": "start-server-and-test start http://localhost:10000 test-jpc-local",
+    "test-meteorite-landings": "start-server-and-test start http://localhost:10000 test-jpc-local",
     "test-frb-local": "npx newman run tests/api/FRB/api-tests-FRB.json -e tests/api/FRB/api-test-env-local.json",
     "test-frb-render": "npx newman run tests/api/FRB/api-tests-FRB.json -e tests/api/FRB/api-test-env-render.json",
     "test-frb": "start-server-and-test start http://localhost:10000 test-frb-local",
     "test-jga-local": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-local.json",
     "test-jga-render": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-render.json",
     "test-jga": "start-server-and-test start http://localhost:10000 test-jga-local",
-    "test": "npm run test-jpc && npm run test-frb && npm run test-jga"
+    "test": "npm run test-meteorite-landings && npm run test-frb && npm run test-jga"
   },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
