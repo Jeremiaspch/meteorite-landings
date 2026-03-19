@@ -18,6 +18,10 @@ if (fs.existsSync(buildPath)) {
     app.get("*", (req, res) => {
         res.sendFile(path.join(buildPath, "index.html"));
     });
+} else {
+    app.get("/", (req, res) => {
+        res.status(200).send("OK");
+    });
 }
 
 app.listen(PORT, () => {
