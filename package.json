@@ -16,7 +16,7 @@
     "test-jga-local": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-local.json",
     "test-jga-render": "npx newman run tests/api/JGA/api-tests-JGA.json -e tests/api/JGA/api-test-env-render.json",
     "test-jga": "start-server-and-test start http://localhost:10000 test-jga-local",
-    "test": "npm run test-meteorite-landings && npm run test-frb"
+    "test": "npm run test-meteorite-landings && npm run test-frb && npm run test-jga"
   },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
