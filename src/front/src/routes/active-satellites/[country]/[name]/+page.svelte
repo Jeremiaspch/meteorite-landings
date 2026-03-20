@@ -3,103 +3,123 @@
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
 
-    const API_URL = '/api/v2/meteorite-landings';
+    // Adaptado a la ruta de satélites
+    const API_URL = '/api/v1/active-satellites';
 
     let countryParam = $page.params.country;
     let nameParam = $page.params.name;
 
-    // MAGIA DE SVELTE 5
-    let meteorite = $state({ name: '', id: '', mass: '', year: '', geolocation: '', country: '' });
+    // MAGIA DE SVELTE 5: Estado reactivo para el satélite
+    let satellite = $state({ 
+        name: '', 
+        country: '', 
+        launch_date: '', 
+        launch_mass: '', 
+        expected_lifetime: '', 
+        apogee_height: '', 
+        perigee_height: '' 
+    });
+    
     let mensajeExito = $state('');
     let mensajeError = $state('');
 
-    onMount(getMeteorite);
+    onMount(getSatellite);
 
-    async function getMeteorite() {
-        const res = await fetch(`${API_URL}/${countryParam}/${nameParam}`);
-        if (res.status === 200) {
-            meteorite = await res.json();
-        } else if (res.status === 404) {
-            mensajeError = `No hemos encontrado ningún meteorito llamado '${nameParam}' en '${countryParam}'.`;
-        } else {
-            mensajeError = "Error al conectar con la base de datos.";
+    async function getSatellite() {
+        try {
+            const res = await fetch(`${API_URL}/${countryParam}/${nameParam}`);
+            if (res.status === 200) {
+                satellite = await res.json();
+            } else if (res.status === 404) {
+                mensajeError = `No hemos encontrado el satélite '${nameParam}' en '${countryParam}'.`;
+            } else {
+                mensajeError = "Error al conectar con la base de datos de satélites.";
+            }
+        } catch (e) {
+            mensajeError = "Error de red al intentar obtener los datos.";
         }
     }
 
     async function guardarCambios() {
-        mensajeExito = ''; mensajeError = '';
+        mensajeExito = ''; 
+        mensajeError = '';
 
         const res = await fetch(`${API_URL}/${countryParam}/${nameParam}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                ...meteorite,
-                id: Number(meteorite.id),
-                mass: Number(meteorite.mass),
-                year: Number(meteorite.year)
+                ...satellite,
+                launch_mass: Number(satellite.launch_mass),
+                expected_lifetime: satellite.expected_lifetime ? Number(satellite.expected_lifetime) : null,
+                apogee_height: Number(satellite.apogee_height),
+                perigee_height: Number(satellite.perigee_height)
             })
         });
 
         if (res.status === 200) {
-            mensajeExito = "¡Los cambios se han guardado correctamente!";
-            // Volvemos a la tabla después de un segundo y medio para que el usuario lea el mensaje verde
-            setTimeout(() => goto('/meteorite-landings'), 1500);
+            mensajeExito = "¡Los cambios del satélite se han guardado correctamente!";
+            // Volvemos a la lista después de un tiempo
+            setTimeout(() => goto('/active-satellites'), 1500);
         } else if (res.status === 400) {
-            mensajeError = "No se ha podido guardar. Comprueba que no falten datos obligatorios.";
+            mensajeError = "Error al guardar. Verifica que los campos numéricos sean correctos.";
         } else if (res.status === 404) {
-            mensajeError = "El meteorito que intentas editar ya no existe.";
+            mensajeError = "El satélite que intentas editar ya no existe en el sistema.";
         } else {
-            mensajeError = "Ha ocurrido un error inesperado.";
+            mensajeError = "Ha ocurrido un error inesperado en el servidor.";
         }
     }
 </script>
 
 <main>
-    <h2>✏️ Editar Meteorito</h2>
+    <h2>✏️ Editar Satélite</h2>
 
     {#if mensajeExito} <div class="alerta exito">{mensajeExito}</div> {/if}
     {#if mensajeError} <div class="alerta error">{mensajeError}</div> {/if}
 
     <section class="formulario">
         <div class="campo-grupo">
-            <label>Nombre (No editable):</label>
-            <input type="text" bind:value={meteorite.name} disabled>
+            <label>Nombre del Satélite (No editable):</label>
+            <input type="text" bind:value={satellite.name} disabled>
         </div>
         
         <div class="campo-grupo">
-            <label>País (No editable):</label>
-            <input type="text" bind:value={meteorite.country} disabled>
+            <label>País / Operador (No editable):</label>
+            <input type="text" bind:value={satellite.country} disabled>
         </div>
 
         <div class="campo-grupo">
-            <label>ID:</label>
-            <input type="number" bind:value={meteorite.id}>
+            <label>Fecha de Lanzamiento (YYYY-MM-DD):</label>
+            <input type="text" bind:value={satellite.launch_date}>
         </div>
         
         <div class="campo-grupo">
-            <label>Masa (g):</label>
-            <input type="number" bind:value={meteorite.mass}>
+            <label>Masa de Lanzamiento (kg):</label>
+            <input type="number" bind:value={satellite.launch_mass}>
         </div>
         
         <div class="campo-grupo">
-            <label>Año:</label>
-            <input type="number" bind:value={meteorite.year}>
+            <label>Vida Útil Esperada (años):</label>
+            <input type="number" bind:value={satellite.expected_lifetime}>
         </div>
         
         <div class="campo-grupo">
-            <label>Geolocalización:</label>
-            <input type="text" bind:value={meteorite.geolocation}>
+            <label>Altura del Apogeo (km):</label>
+            <input type="number" bind:value={satellite.apogee_height}>
+        </div>
+
+        <div class="campo-grupo">
+            <label>Altura del Perigeo (km):</label>
+            <input type="number" bind:value={satellite.perigee_height}>
         </div>
         
         <div class="botones">
             <button onclick={guardarCambios} class="btn-guardar">Guardar cambios</button>
-            <button onclick={() => goto('/meteorite-landings')} class="btn-volver">Cancelar y volver</button>
+            <button onclick={() => goto('/active-satellites')} class="btn-volver">Cancelar y volver</button>
         </div>
     </section>
 </main>
 
 <style>
-    /* Estilos compartidos con la página principal para mantener la coherencia */
     :global(body) {
         background-color: #f8fafc; 
         color: #334155; 
@@ -109,7 +129,7 @@
     }
 
     main {
-        max-width: 700px; /* Un poco más estrecho para el formulario */
+        max-width: 700px;
         margin: 40px auto;
         padding: 0 20px;
     }
@@ -119,7 +139,7 @@
         font-size: 2.2rem;
         font-weight: 800;
         margin-bottom: 30px;
-        border-bottom: 3px solid #ffc107; /* Acento amarillo para "Editar" */
+        border-bottom: 3px solid #ffc107; /* Acento amarillo de edición */
         display: inline-block;
         padding-bottom: 5px;
     }
@@ -141,7 +161,7 @@
         background: #ffffff;
         padding: 30px;
         border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         border: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
@@ -168,7 +188,7 @@
         font-size: 15px;
         transition: border-color 0.2s;
         width: 100%;
-        box-sizing: border-box; /* Para que el padding no rompa el ancho */
+        box-sizing: border-box;
     }
     input:focus:not(:disabled) {
         outline: none;
