@@ -3,82 +3,168 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	const API = '/api/v2/meteorite-landings';
-	
+	const API = '/api/v1/meteorite-landings';
+	const LIMIT = 10;
+
 	let meteorites = $state([]);
-	let responseStatusCode = $state(0);
+	let total = $state(0);
+	let page = $state(0);
+	let loading = $state(true);
 
-	// Función para cargar todos los meteoritos al entrar en la página
+	// Campos del formulario de creación
+	let newName = $state('');
+	let newId = $state('');
+	let newMass = $state('');
+	let newYear = $state('');
+	let newGeolocation = $state('');
+	let newCountry = $state('');
+
+	let totalPages = $derived(Math.ceil(total / LIMIT));
+
 	async function getMeteorites() {
+		loading = true;
+		const offset = page * LIMIT;
 		try {
-			const response = await fetch(API, { method: 'GET' });
-			responseStatusCode = response.status;
+			const res = await fetch(`${API}?limit=${LIMIT}&offset=${offset}`);
+			if (res.ok) {
+				meteorites = await res.json();
+			}
+		} catch (err) {
+			console.error('Error de red:', err);
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function getTotal() {
+		const res = await fetch(`${API}?limit=0`);
+		if (res.ok) {
+			const all = await res.json();
+			total = all.length;
+		}
+	}
+
+	async function loadInitialData() {
+		if (!confirm('¿Cargar los datos iniciales del CSV?')) return;
+		const res = await fetch(`${API}/loadInitialData`);
+		alert(res.ok ? '✅ Datos cargados.' : '❌ Error. Puede que ya haya datos.');
+		page = 0;
+		await getTotal();
+		await getMeteorites();
+	}
+
+	async function deleteAll() {
+		if (!confirm('⚠️ ¿Borrar TODOS los meteoritos? Esta acción no se puede deshacer.')) return;
+		const res = await fetch(API, { method: 'DELETE' });
+		alert(res.ok ? '✅ Todos los meteoritos eliminados.' : `❌ Error: ${res.status}`);
+		page = 0;
+		total = 0;
+		await getMeteorites();
+	}
+
+	async function deleteOne(country, name) {
+		if (!confirm(`¿Eliminar "${name}" (${country})?`)) return;
+		const res = await fetch(`${API}/${encodeURIComponent(country)}/${encodeURIComponent(name)}`, {
+			method: 'DELETE'
+		});
+		if (res.ok) {
+			alert(`✅ Meteorito "${name}" eliminado correctamente.`);  // ← esto faltaba
+			total = total - 1;
 			
-			if (response.ok) {
-				meteorites = await response.json();
-			} else {
-				console.error('Error al obtener datos:', response.status);
-			}
-		} catch (error) {
-			console.error('Error de red:', error);
+			if (meteorites.length === 1 && page > 0) page = page - 1;
+			await getMeteorites();
+		} else {
+			alert(`❌ No se pudo eliminar. Código: ${res.status}`);
 		}
 	}
 
-	// Función para borrar un meteorito de la fila (recurso concreto)
-	async function deleteMeteorite(country, name) {
-		if (!confirm(`¿Estás seguro de que quieres eliminar el meteorito ${name} (${country})?`)) {
+	async function createMeteorite() {
+		if (!newName || !newId || !newMass || !newYear || !newGeolocation || !newCountry) {
+			alert('❌ Todos los campos son obligatorios.');
 			return;
 		}
 
-		try {
-			const response = await fetch(`${API}/${encodeURIComponent(country)}/${encodeURIComponent(name)}`, {
-				method: 'DELETE'
-			});
+		const res = await fetch(API, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: newName,
+				id: Number(newId),
+				mass: Number(newMass),
+				year: Number(newYear),
+				geolocation: newGeolocation,
+				country: newCountry
+			})
+		});
 
-			if (response.ok) {
-				alert(`✅ Meteorito ${name} eliminado correctamente.`);
-				// Recargamos la lista para que desaparezca la fila inmediatamente
-				getMeteorites(); 
-			} else {
-				alert(`❌ No se pudo eliminar el meteorito. Código de error: ${response.status}`);
-			}
-		} catch (error) {
-			alert("🔌 Error de conexión con el servidor.");
+		if (res.status === 201) {
+			alert(`✅ Meteorito "${newName}" creado.`);
+			// Limpiamos el formulario
+			newName = ''; newId = ''; newMass = ''; newYear = ''; newGeolocation = ''; newCountry = '';
+			total = total + 1;
+			await getMeteorites();
+		} else if (res.status === 409) {
+			alert('❌ Ese meteorito ya existe.');
+		} else {
+			alert(`❌ Error al crear. Código: ${res.status}`);
 		}
 	}
 
-	// Función para borrar TODOS los recursos
-	async function deleteAllMeteorites() {
-		if (!confirm("⚠️ ATENCIÓN: ¿Estás completamente seguro de que quieres borrar TODOS los meteoritos? Esta acción no se puede deshacer.")) {
-			return;
-		}
-
-		try {
-			const response = await fetch(API, { method: 'DELETE' });
-
-			if (response.ok) {
-				alert("✅ Todos los meteoritos han sido eliminados de la base de datos.");
-				// Vaciamos la lista en la pantalla
-				getMeteorites(); 
-			} else {
-				alert(`❌ Error al intentar borrar todo. Código: ${response.status}`);
-			}
-		} catch (error) {
-			alert("🔌 Error de conexión con el servidor.");
-		}
+	async function goToPage(newPage) {
+		page = newPage;
+		await getMeteorites();
 	}
 
-	// Cuando el componente carga en pantalla, pedimos los datos
-	onMount(getMeteorites);
+	onMount(async () => {
+		await getTotal();
+		await getMeteorites();
+	});
 </script>
 
-<h2>Listado de Meteoritos</h2>
+<h2>Meteoritos</h2>
 
-<button onclick={() => goto('/meteorite-landings/create')}>Crear nuevo meteorito</button>
-<button onclick={deleteAllMeteorites}>Borrar todos los meteoritos</button>
+<button onclick={loadInitialData}>Cargar datos iniciales</button>
+<button onclick={deleteAll}>Borrar todos</button>
+
 <br><br>
 
-{#if responseStatusCode === 200 && meteorites.length > 0}
+<!-- FORMULARIO DE CREACIÓN -->
+<h3>Crear nuevo meteorito</h3>
+<table border="1" cellpadding="8" cellspacing="0">
+	<thead>
+		<tr>
+			<th>País</th>
+			<th>Nombre</th>
+			<th>ID</th>
+			<th>Masa (g)</th>
+			<th>Año</th>
+			<th>Geolocalización</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><input type="text" bind:value={newCountry} placeholder="Spain" /></td>
+			<td><input type="text" bind:value={newName} placeholder="Nombre" /></td>
+			<td><input type="number" bind:value={newId} placeholder="12345" /></td>
+			<td><input type="number" bind:value={newMass} placeholder="500" /></td>
+			<td><input type="number" bind:value={newYear} placeholder="1990" /></td>
+			<td><input type="text" bind:value={newGeolocation} placeholder="(40.4, -3.7)" /></td>
+			<td><button onclick={createMeteorite}>Crear</button></td>
+		</tr>
+	</tbody>
+</table>
+
+<br>
+
+<!-- LISTADO -->
+<h3>Listado ({total} meteoritos)</h3>
+
+{#if loading}
+	<p>Cargando...</p>
+{:else if total === 0}
+	<p>No hay meteoritos. Crea uno o carga los datos iniciales.</p>
+{:else}
 	<table border="1" cellpadding="8" cellspacing="0">
 		<thead>
 			<tr>
@@ -92,27 +178,27 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each meteorites as meteorite}
+			{#each meteorites as m}
 				<tr>
-					<td>{meteorite.country}</td>
-					<td>{meteorite.name}</td>
-					<td>{meteorite.id}</td>
-					<td>{meteorite.mass}</td>
-					<td>{meteorite.year}</td>
-					<td>{meteorite.geolocation}</td>
+					<td>{m.country}</td>
+					<td>{m.name}</td>
+					<td>{m.id}</td>
+					<td>{m.mass}</td>
+					<td>{m.year}</td>
+					<td>{m.geolocation}</td>
 					<td>
-						<button onclick={() => goto(`/meteorite-landings/${meteorite.country}/${meteorite.name}`)}>Editar</button>
-						
-						<button onclick={() => deleteMeteorite(meteorite.country, meteorite.name)}>Eliminar</button>
+						<button onclick={() => goto(`/meteorite-landings/${m.country}/${m.name}`)}>Editar</button>
+						<button onclick={() => deleteOne(m.country, m.name)}>Eliminar</button>
 					</td>
 				</tr>
 			{/each}
 		</tbody>
 	</table>
-{:else if responseStatusCode === 404 || meteorites.length === 0}
-	<p>No hay meteoritos en la base de datos. ¡Crea uno nuevo!</p>
-{:else}
-	<p>Cargando datos del servidor...</p>
+
+	<br>
+	<button onclick={() => goToPage(page - 1)} disabled={page === 0}>← Anterior</button>
+	Página {page + 1} de {totalPages}
+	<button onclick={() => goToPage(page + 1)} disabled={page + 1 >= totalPages}>Siguiente →</button>
 {/if}
 
 <br>
