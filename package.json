@@ -27,6 +27,8 @@
     "express": "^4.22.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
     "start-server-and-test": "^2.1.5"
   }
 }
