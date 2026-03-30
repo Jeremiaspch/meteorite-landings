@@ -11,7 +11,12 @@
 - **Proyecto está desplegado en Render y accesible en esta URL:**
 [https://sos2526-14-yjus.onrender.com/](https://sos2526-14-yjus.onrender.com/)
 
-- **APIs**:
+- **APIs v1**:
   - http://sos2526-14.onrender.com/api/v1/active-satellites/docs (developed by Jaime García Algarra)
   - http://sos2526-14.onrender.com/api/v1/meteorite-landings/docs (developed by Jeremías J. Pluas Charcopa)
   - https://sos2526-14.onrender.com/api/v1/space-launches/docs (developed by Fernando Reguera Bueno)
+
+- **APIs v2**:
+  - (developed by Jaime García Algarra)
+  - http://sos2526-14.onrender.com/api/v2/meteorite-landings/docs (developed by Jeremías J. Pluas Charcopa)
+  - (developed by Fernando Reguera Bueno)

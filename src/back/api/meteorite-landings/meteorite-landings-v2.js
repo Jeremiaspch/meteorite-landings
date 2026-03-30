@@ -29,11 +29,11 @@ function validarMeteorito(req, res, next) {
 }
 
 /* ============================================================
-    DOCUMENTACIÓN (/docs) -> Requisito L06
+    DOCUMENTACIÓN (/docs) -> Requisito L09
 ============================================================ */
 router.get("/docs", (req, res) => {
     // IMPORTANTE: Sustituye este enlace por tu URL pública de Postman
-    res.redirect("https://documenter.getpostman.com/view/52378516/2sBXiertzB");
+    res.redirect("https://documenter.getpostman.com/view/52378516/2sBXinGVmA");
 });
 
 /* ============================================================
