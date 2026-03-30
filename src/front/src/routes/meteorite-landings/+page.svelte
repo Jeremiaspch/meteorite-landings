@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	const API = '/api/v1/meteorite-landings';
+	const API = '/api/v2/meteorite-landings';
 	const LIMIT = 10;
 
 	let meteorites = $state([]);

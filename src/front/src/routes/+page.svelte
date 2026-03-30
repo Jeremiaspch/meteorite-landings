@@ -17,7 +17,9 @@
                     <div class="botones-recursos">
                         <a href="/meteorite-landings" class="btn-front">💻 Ver Frontend</a>
                         <a href="/api/v1/meteorite-landings" target="_blank" class="btn-api">⚙️ API v1</a>
-                        <a href="/api/v1/meteorite-landings/docs" target="_blank" class="btn-docs">📚 Ver Documentación de la API</a>
+                        <a href="/api/v2/meteorite-landings" target="_blank" class="btn-api">⚙️ API v2</a>
+                        <a href="/api/v1/meteorite-landings/docs" target="_blank" class="btn-docs">📚 Ver Documentación de la API v1</a>
+                        <a href="/api/v2/meteorite-landings/docs" target="_blank" class="btn-docs">📚 Ver Documentación de la API v2</a>
                     </div>
                 </div>
 

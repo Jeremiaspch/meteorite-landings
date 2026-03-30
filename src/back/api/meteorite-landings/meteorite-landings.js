@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const csv = require('csvtojson');
+const path = require("path");
 
 // En meteorite-landings.js (v1)
+const meteorite_csv = path.join(__dirname, "../../data/meteorite-landings/meteorite-landings-with-country.csv");
 const db = require('../../data/meteorite-landings/meteorite-data.js');
-
 
 // Nos quedamos solo con los datos que aportan valor real a la API
 const camposObligatorios = ["name", "id", "mass", "year", "geolocation", "country"];
