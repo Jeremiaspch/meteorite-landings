@@ -4,12 +4,9 @@ const path = require("path");
 const csv = require("csvtojson");
 const Datastore = require("@seald-io/nedb");
 
-const csvFile = path.join(__dirname, "/../data/space-missions-with-country.csv");
+const csvFile = path.join(__dirname, "../../data/space-missions/space-missions-with-country.csv");
 
-const db = new Datastore({
-    filename: path.join(process.cwd(), "data", "space-launches.db"),
-    autoload: true
-});
+const db = require('../../data/space-missions/space-data.js');
 
 /* ============================================================
    CAMPOS IMPORTANTES
