@@ -4,7 +4,7 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
 
-    const API = '/api/v1/space-launches';
+    const API = '/api/v2/space-launches';
 
     const countryParam = page.params.country;
     const idParam = page.params.id;
@@ -29,8 +29,10 @@
                 newYear = resource.year;
                 newRocket = resource.rocket_name;
                 newStatus = resource.mission_status;
+            } else if (response.status === 404) {
+                console.error('Misión no encontrada:', response.status);
             } else {
-                console.error('Error al obtener recurso:', response.status);
+                alert(`❌ Error al cargar la misión. Código: ${response.status}`);
             }
         } catch (error) {
             console.error('Error de red:', error);
@@ -56,8 +58,12 @@
             if (response.ok) {
                 alert(`✅ La misión ${idParam} se ha actualizado correctamente.`);
                 goto('/space-launches');
+            } else if (response.status === 400) {
+                alert('❌ Datos incorrectos. Revisa que todos los campos sean válidos.');
+            } else if (response.status === 404) {
+                alert(`❌ No existe una misión con ID ${idParam} en ${decodeURIComponent(countryParam)}.`);
             } else {
-                alert('❌ Faltan datos obligatorios o hay algún error.');
+                alert(`❌ Error al actualizar la misión. Código: ${response.status}`);
             }
         } catch (error) {
             console.error('Error al actualizar:', error);
@@ -67,7 +73,7 @@
     onMount(getResource);
 </script>
 
-<h3>Editar misión {idParam} ({decodeURIComponent(countryParam)})</h3>
+<h3>✏️ Editar misión {idParam} ({decodeURIComponent(countryParam)})</h3>
 
 {#if resource}
     <table border="1" cellpadding="8" cellspacing="0">
@@ -107,7 +113,7 @@
     <button onclick={() => goto('/space-launches')}>Volver</button>
 
 {:else if responseStatusCode === 404}
-    <p>No se encontró la misión con ID {idParam} en {decodeURIComponent(countryParam)}.</p>
+    <p>❌ No se encontró la misión con ID {idParam} en {decodeURIComponent(countryParam)}.</p>
     <button onclick={() => goto('/space-launches')}>Volver a la lista</button>
 {:else}
     <p>Cargando detalles de la misión {idParam}...</p>
