@@ -20,22 +20,37 @@
 
     let limit = 10; 
     let offset = $state(0); 
+
+    // --- VARIABLES DE BÚSQUEDA AVANZADA ---
     let busquedaPais = $state('');
     let busquedaNombre = $state('');
+    let busquedaFrom = $state(''); // Año/Fecha inicio
+    let busquedaTo = $state('');   // Año/Fecha fin
+    let busquedaMasa = $state('');
+    let busquedaVida = $state('');
+    let busquedaApogeo = $state('');
+    let busquedaPerigeo = $state('');
 
     onMount(getSatellites);
 
     async function getSatellites() {
         limpiarMensajes();
         try {
+            // Construimos la URL dinámicamente con todos los filtros que el usuario haya rellenado
             let url = `${API_URL}?limit=${limit}&offset=${offset}`;
             if (busquedaPais) url += `&country=${busquedaPais}`;
             if (busquedaNombre) url += `&name=${busquedaNombre}`;
+            if (busquedaFrom) url += `&from=${busquedaFrom}`;
+            if (busquedaTo) url += `&to=${busquedaTo}`;
+            if (busquedaMasa) url += `&launch_mass=${busquedaMasa}`;
+            if (busquedaVida) url += `&expected_lifetime=${busquedaVida}`;
+            if (busquedaApogeo) url += `&apogee_height=${busquedaApogeo}`;
+            if (busquedaPerigeo) url += `&perigee_height=${busquedaPerigeo}`;
 
             const res = await fetch(url);
             if (res.ok) {
                 satellites = await res.json();
-                if (satellites.length === 0 && (busquedaPais || busquedaNombre)) {
+                if (satellites.length === 0) {
                     mostrarError("No se encontraron satélites con esos filtros.");
                 }
             } else {
@@ -46,7 +61,6 @@
         }
     }
 
-    // --- NUEVA FUNCIÓN: CARGAR DATOS INICIALES ---
     async function cargarDatosIniciales() {
         limpiarMensajes();
         const res = await fetch(`${API_URL}/loadInitialData`);
@@ -60,13 +74,20 @@
     }
 
     function buscar() {
-        offset = 0; 
+        offset = 0; // Reiniciamos la paginación al buscar
         getSatellites();
     }
 
     function recargarLista() {
+        // Limpiamos todos los campos de búsqueda
         busquedaPais = '';
         busquedaNombre = '';
+        busquedaFrom = '';
+        busquedaTo = '';
+        busquedaMasa = '';
+        busquedaVida = '';
+        busquedaApogeo = '';
+        busquedaPerigeo = '';
         offset = 0; 
         getSatellites();
     }
@@ -144,23 +165,35 @@
     {#if mensajeError} <div class="alerta error">{mensajeError}</div> {/if}
 
     <section class="busqueda-box">
-        <h3>🔍 Buscar</h3>
-        <input type="text" placeholder="País" bind:value={busquedaPais}>
-        <input type="text" placeholder="Nombre" bind:value={busquedaNombre}>
-        <button onclick={buscar} class="btn-buscar">Buscar</button>
-        <button onclick={recargarLista} class="btn-recargar">Limpiar</button>
+        <h3>🔍 Búsqueda Avanzada</h3>
+        <div class="grid-busqueda">
+            <input type="text" placeholder="País" bind:value={busquedaPais}>
+            <input type="text" placeholder="Nombre" bind:value={busquedaNombre}>
+            <input type="text" placeholder="Desde (ej. 2000)" bind:value={busquedaFrom}>
+            <input type="text" placeholder="Hasta (ej. 2017)" bind:value={busquedaTo}>
+            <input type="number" placeholder="Masa (kg)" bind:value={busquedaMasa}>
+            <input type="number" placeholder="Vida útil" bind:value={busquedaVida}>
+            <input type="number" placeholder="Apogeo" bind:value={busquedaApogeo}>
+            <input type="number" placeholder="Perigeo" bind:value={busquedaPerigeo}>
+        </div>
+        <div class="botones-busqueda">
+            <button onclick={buscar} class="btn-buscar">Aplicar Filtros</button>
+            <button onclick={recargarLista} class="btn-recargar">Limpiar Filtros</button>
+        </div>
     </section>
 
     <section class="formulario">
         <h3>➕ Nuevo Satélite</h3>
-        <input type="text" placeholder="Nombre" bind:value={nuevoSatelite.name}>
-        <input type="text" placeholder="País" bind:value={nuevoSatelite.country}>
-        <input type="text" placeholder="Lanzamiento" bind:value={nuevoSatelite.launch_date}>
-        <input type="number" placeholder="Masa (kg)" bind:value={nuevoSatelite.launch_mass}>
-        <input type="number" placeholder="Vida (años)" bind:value={nuevoSatelite.expected_lifetime}>
-        <input type="number" placeholder="Apogeo" bind:value={nuevoSatelite.apogee_height}>
-        <input type="number" placeholder="Perigeo" bind:value={nuevoSatelite.perigee_height}>
-        <button onclick={crearSatelite} class="btn-guardar">Añadir Satélite</button>
+        <div class="grid-busqueda">
+            <input type="text" placeholder="Nombre" bind:value={nuevoSatelite.name}>
+            <input type="text" placeholder="País" bind:value={nuevoSatelite.country}>
+            <input type="text" placeholder="Lanzamiento (YYYY-MM-DD)" bind:value={nuevoSatelite.launch_date}>
+            <input type="number" placeholder="Masa (kg)" bind:value={nuevoSatelite.launch_mass}>
+            <input type="number" placeholder="Vida (años)" bind:value={nuevoSatelite.expected_lifetime}>
+            <input type="number" placeholder="Apogeo" bind:value={nuevoSatelite.apogee_height}>
+            <input type="number" placeholder="Perigeo" bind:value={nuevoSatelite.perigee_height}>
+        </div>
+        <button onclick={crearSatelite} class="btn-guardar mt-10">Añadir Satélite</button>
     </section>
 
     <div class="acciones-globales">
@@ -184,7 +217,7 @@
             {#each satellites as s}
                 <tr>
                     <td>{s.name}</td><td>{s.country}</td><td>{s.launch_date}</td><td>{s.launch_mass}</td><td>{s.expected_lifetime}</td><td>{s.apogee_height}/{s.perigee_height}</td>
-                    <td>
+                    <td class="td-acciones">
                         <button onclick={() => goto(`/active-satellites/${s.country}/${s.name}`)} class="btn-editar">Editar</button>
                         <button onclick={() => borrarSatelite(s.country, s.name)} class="btn-borrar">Borrar</button>
                     </td>
@@ -195,28 +228,44 @@
 </main>
 
 <style>
-    /* ... (Estilos anteriores) ... */
     :global(body) { background-color: #f8fafc; color: #334155; font-family: sans-serif; }
     main { max-width: 1100px; margin: 20px auto; padding: 20px; }
     h2 { border-bottom: 3px solid #007bff; display: inline-block; padding-bottom: 5px; }
     .alerta { padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid; }
     .exito { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
     .error { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+    
     section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .busqueda-box { background: #e0f2fe; }
-    input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    .busqueda-box { background: #e0f2fe; border: 1px solid #bae6fd;}
+    
+    .grid-busqueda {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    
+    .botones-busqueda { display: flex; gap: 10px; }
     .acciones-globales { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; }
+    .paginacion { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
+    
     table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
     th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
     th { background: #f1f5f9; }
+    .td-acciones { display: flex; gap: 5px;}
+
     button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { opacity: 0.8; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     
-    .btn-inicial { background-color: #007bff; color: white; } /* Color Azul para Carga */
+    .mt-10 { margin-top: 10px; }
+    .btn-inicial { background-color: #007bff; color: white; }
     .btn-guardar { background-color: #28a745; color: white; }
     .btn-buscar { background-color: #6f42c1; color: white; }
     .btn-recargar { background-color: #17a2b8; color: white; }
     .btn-peligro, .btn-borrar { background-color: #dc3545; color: white; }
     .btn-editar { background-color: #ffc107; color: #333; }
-    .btn-paginacion { background: #eee; }
+    .btn-paginacion { background: #cbd5e1; color: #0f172a; }
 </style>
