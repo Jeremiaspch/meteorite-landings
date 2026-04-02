@@ -74,8 +74,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd src/front && npm run dev',
+    command: 'npm start & cd src/front && npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
   },
