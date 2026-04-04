@@ -3,7 +3,7 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
 
-    const API = '/api/v1/space-launches';
+    const API = '/api/v2/space-launches';
     const LIMIT = 10;
 
     let misiones = $state([]);
@@ -11,6 +11,7 @@
     let page = $state(0);
     let loading = $state(true);
 
+    // Campos del formulario de creación
     let newMissionId = $state('');
     let newCompany = $state('');
     let newLocation = $state('');
@@ -18,6 +19,13 @@
     let newRocket = $state('');
     let newStatus = $state('');
     let newCountry = $state('');
+
+    // Filtro statistics
+    let filterFrom = $state('');
+    let filterTo = $state('');
+    let filtered = $state([]);
+    let filterLoading = $state(false);
+    let filterUsed = $state(false);
 
     let totalPages = $derived(Math.ceil(total / LIMIT));
 
@@ -28,6 +36,8 @@
             const res = await fetch(`${API}?limit=${LIMIT}&offset=${offset}`);
             if (res.ok) {
                 misiones = await res.json();
+            } else {
+                alert(`❌ Error al cargar las misiones. Código: ${res.status}`);
             }
         } catch (err) {
             console.error('Error de red:', err);
@@ -47,7 +57,7 @@
     async function loadInitialData() {
         if (!confirm('¿Cargar los datos iniciales del CSV?')) return;
         const res = await fetch(`${API}/loadInitialData`);
-        alert(res.ok ? '✅ Datos cargados.' : '❌ Error. Puede que ya haya datos.');
+        alert(res.ok ? '✅ Datos cargados correctamente.' : '❌ Error. Puede que ya haya datos cargados.');
         page = 0;
         await getTotal();
         await getMisiones();
@@ -56,7 +66,7 @@
     async function deleteAll() {
         if (!confirm('⚠️ ¿Borrar TODAS las misiones? Esta acción no se puede deshacer.')) return;
         const res = await fetch(API, { method: 'DELETE' });
-        alert(res.ok ? '✅ Todas las misiones eliminadas.' : `❌ Error: ${res.status}`);
+        alert(res.ok ? '✅ Todas las misiones han sido eliminadas.' : `❌ Error al borrar. Código: ${res.status}`);
         page = 0;
         total = 0;
         await getMisiones();
@@ -70,6 +80,8 @@
             total = total - 1;
             if (misiones.length === 1 && page > 0) page = page - 1;
             await getMisiones();
+        } else if (res.status === 404) {
+            alert(`❌ No existe una misión con ID ${id} en ${country}.`);
         } else {
             alert(`❌ No se pudo eliminar. Código: ${res.status}`);
         }
@@ -103,9 +115,43 @@
             await getMisiones();
         } else if (res.status === 409) {
             alert('❌ Ya existe una misión con ese ID.');
+        } else if (res.status === 400) {
+            alert('❌ Datos incorrectos. Revisa que todos los campos sean válidos.');
         } else {
-            alert(`❌ Error al crear. Código: ${res.status}`);
+            alert(`❌ Error al crear la misión. Código: ${res.status}`);
         }
+    }
+
+    async function buscarFiltro() {
+        if (!filterFrom && !filterTo) {
+            alert('❌ Introduce al menos un año para filtrar.');
+            return;
+        }
+        filterLoading = true;
+        filterUsed = true;
+        let url = `${API}/statistics?`;
+        if (filterFrom) url += `from=${filterFrom}`;
+        if (filterFrom && filterTo) url += '&';
+        if (filterTo) url += `to=${filterTo}`;
+        try {
+            const res = await fetch(url);
+            if (res.ok) {
+                filtered = await res.json();
+            } else {
+                alert(`❌ Error al buscar. Código: ${res.status}`);
+            }
+        } catch (err) {
+            console.error('Error de red:', err);
+        } finally {
+            filterLoading = false;
+        }
+    }
+
+    function limpiarFiltro() {
+        filterFrom = '';
+        filterTo = '';
+        filtered = [];
+        filterUsed = false;
     }
 
     async function goToPage(newPage) {
@@ -119,13 +165,57 @@
     });
 </script>
 
-<h2>Lanzamientos Espaciales</h2>
+<h2>🚀 Lanzamientos Espaciales</h2>
 
 <button onclick={loadInitialData}>Cargar datos iniciales</button>
 <button onclick={deleteAll}>Borrar todos</button>
 
 <br><br>
 
+<!-- FILTRO POR RANGO DE AÑOS -->
+<h3>Filtrar por rango de años</h3>
+<input type="number" bind:value={filterFrom} placeholder="Desde (ej: 2000)" />
+<input type="number" bind:value={filterTo} placeholder="Hasta (ej: 2020)" />
+<button onclick={buscarFiltro}>Buscar</button>
+<button onclick={limpiarFiltro}>Limpiar</button>
+
+{#if filterLoading}
+    <p>Buscando...</p>
+{:else if filterUsed && filtered.length === 0}
+    <p>No se encontraron misiones en ese rango de años.</p>
+{:else if filtered.length > 0}
+    <p>{filtered.length} misiones encontradas</p>
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Empresa</th>
+                <th>Cohete</th>
+                <th>Ubicación</th>
+                <th>Año</th>
+                <th>País</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each filtered as m}
+                <tr>
+                    <td>{m.mission_id}</td>
+                    <td>{m.company_name}</td>
+                    <td>{m.rocket_name}</td>
+                    <td>{m.location}</td>
+                    <td>{m.year}</td>
+                    <td>{m.country}</td>
+                    <td>{m.mission_status}</td>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
+{/if}
+
+<br>
+
+<!-- FORMULARIO DE CREACIÓN -->
 <h3>Crear nueva misión</h3>
 <table border="1" cellpadding="8" cellspacing="0">
     <thead>
@@ -164,6 +254,7 @@
 
 <br>
 
+<!-- LISTADO -->
 <h3>Listado ({total} misiones)</h3>
 
 {#if loading}
