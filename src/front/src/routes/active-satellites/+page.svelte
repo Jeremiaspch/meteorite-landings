@@ -24,8 +24,8 @@
     // --- VARIABLES DE BÚSQUEDA AVANZADA ---
     let busquedaPais = $state('');
     let busquedaNombre = $state('');
-    let busquedaFrom = $state(''); // Año/Fecha inicio
-    let busquedaTo = $state('');   // Año/Fecha fin
+    let busquedaFrom = $state('');
+    let busquedaTo = $state('');
     let busquedaMasa = $state('');
     let busquedaVida = $state('');
     let busquedaApogeo = $state('');
@@ -36,7 +36,6 @@
     async function getSatellites() {
         limpiarMensajes();
         try {
-            // Construimos la URL dinámicamente con todos los filtros que el usuario haya rellenado
             let url = `${API_URL}?limit=${limit}&offset=${offset}`;
             if (busquedaPais) url += `&country=${busquedaPais}`;
             if (busquedaNombre) url += `&name=${busquedaNombre}`;
@@ -51,35 +50,36 @@
             if (res.ok) {
                 satellites = await res.json();
                 if (satellites.length === 0) {
-                    mostrarError("No se encontraron satélites con esos filtros.");
+                    mostrarError("No se han encontrado satélites que coincidan con estos filtros.");
                 }
             } else {
-                mostrarError("No se han podido cargar los datos.");
+                mostrarError("Hubo un problema al cargar la lista de satélites. Por favor, inténtalo más tarde.");
             }
         } catch (error) {
-            mostrarError("Error de conexión con el servidor.");
+            mostrarError("Error de conexión. Comprueba que el servidor está encendido.");
         }
     }
 
     async function cargarDatosIniciales() {
         limpiarMensajes();
         const res = await fetch(`${API_URL}/loadInitialData`);
-        if (res.ok) {
+        if (res.status === 201 || res.status === 200) {
             const data = await res.json();
-            mostrarExito(`Se han cargado ${data.length} satélites de prueba correctamente.`);
+            mostrarExito(`¡Perfecto! Se han cargado ${data.length || 'los'} satélites de prueba en el sistema.`);
             recargarLista();
+        } else if (res.status === 409) {
+            mostrarError("La base de datos ya contiene información. Debes vaciarla antes de cargar los datos iniciales.");
         } else {
-            mostrarError("Error al cargar los datos iniciales. Es posible que la base de datos ya contenga datos.");
+            mostrarError("Ha ocurrido un error inesperado al intentar cargar los datos de prueba.");
         }
     }
 
     function buscar() {
-        offset = 0; // Reiniciamos la paginación al buscar
+        offset = 0; 
         getSatellites();
     }
 
     function recargarLista() {
-        // Limpiamos todos los campos de búsqueda
         busquedaPais = '';
         busquedaNombre = '';
         busquedaFrom = '';
@@ -119,50 +119,75 @@
         });
 
         if (res.status === 201) {
-            mostrarExito(`¡Satélite ${nuevoSatelite.name} añadido!`);
+            mostrarExito(`¡El satélite '${nuevoSatelite.name}' de '${nuevoSatelite.country}' se ha creado correctamente!`);
             nuevoSatelite = { name: '', country: '', launch_date: '', launch_mass: '', expected_lifetime: '', apogee_height: '', perigee_height: '' }; 
             recargarLista(); 
+        } else if (res.status === 400) {
+            mostrarError("Algunos datos introducidos no son válidos. Revisa que no haya campos vacíos y que los números sean correctos.");
         } else if (res.status === 409) {
-            mostrarError(`El satélite '${nuevoSatelite.name}' ya existe.`);
+            mostrarError(`Ya existe un satélite registrado con el nombre '${nuevoSatelite.name}' para el país '${nuevoSatelite.country}'.`);
         } else {
-            mostrarError("Error al guardar. Revisa los campos.");
+            mostrarError("Ha ocurrido un error en el servidor al intentar guardar el satélite.");
         }
     }
 
     async function borrarSatelite(country, name) {
         limpiarMensajes();
-        if (!confirm(`¿Eliminar ${name}?`)) return;
+        
+        // Confirmación nativa (como pide el enunciado antes de ejecutar)
+        if (!confirm(`¿Estás seguro de que deseas eliminar el satélite '${name}'? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+        
         const res = await fetch(`${API_URL}/${country}/${name}`, { method: 'DELETE' });
+        
         if (res.status === 200) {
-            mostrarExito("Eliminado correctamente.");
+            mostrarExito(`El satélite '${name}' ha sido eliminado exitosamente del sistema.`);
             getSatellites(); 
+        } else if (res.status === 404) {
+            // Manejo específico del 404 con mensaje comprensible (ejemplo del enunciado)
+            mostrarError(`No existe ningún satélite con el nombre '${name}' en el país '${country}' que se pueda borrar.`);
         } else {
-            mostrarError("No se ha podido eliminar.");
+            mostrarError(`No se ha podido eliminar el satélite '${name}'. Es posible que haya un problema en el servidor.`);
         }
     }
 
     async function borrarTodos() {
         limpiarMensajes();
-        if (!confirm("¿Seguro que quieres borrar TODO?")) return;
+        if (!confirm("⚠️ ADVERTENCIA: ¿Seguro que quieres borrar TODOS los satélites de la base de datos?")) return;
+        
         const res = await fetch(API_URL, { method: 'DELETE' });
         if (res.status === 200) {
-            mostrarExito("Base de datos vaciada.");
+            mostrarExito("Todos los satélites han sido eliminados. La base de datos está vacía.");
             recargarLista();
         } else {
-            mostrarError("Error al vaciar la base de datos.");
+            mostrarError("No se ha podido vaciar la base de datos debido a un error del servidor.");
         }
     }
 
-    function mostrarExito(msg) { mensajeExito = msg; }
-    function mostrarError(msg) { mensajeError = msg; }
-    function limpiarMensajes() { mensajeExito = ''; mensajeError = ''; }
+    // Funciones de ayuda modificadas para hacer scroll automático hacia arriba
+    // Esto asegura que el usuario SIEMPRE vea el mensaje si estaba abajo en la tabla
+    function mostrarExito(msg) { 
+        mensajeExito = msg; 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function mostrarError(msg) { 
+        mensajeError = msg; 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function limpiarMensajes() { 
+        mensajeExito = ''; 
+        mensajeError = ''; 
+    }
 </script>
 
 <main>
     <h2>Gestión de Satélites</h2>
 
-    {#if mensajeExito} <div class="alerta exito">{mensajeExito}</div> {/if}
-    {#if mensajeError} <div class="alerta error">{mensajeError}</div> {/if}
+    {#if mensajeExito} <div class="alerta exito">✅ {mensajeExito}</div> {/if}
+    {#if mensajeError} <div class="alerta error">❌ {mensajeError}</div> {/if}
 
     <section class="busqueda-box">
         <h3>🔍 Búsqueda Avanzada</h3>
@@ -228,13 +253,18 @@
 </main>
 
 <style>
+    /* Mantengo tus estilos intactos ya que funcionan perfectamente */
     :global(body) { background-color: #f8fafc; color: #334155; font-family: sans-serif; }
     main { max-width: 1100px; margin: 20px auto; padding: 20px; }
     h2 { border-bottom: 3px solid #007bff; display: inline-block; padding-bottom: 5px; }
-    .alerta { padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid; }
+    
+    /* He añadido un poco de sombra y transición a la alerta para que destaque más */
+    .alerta { padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease-in-out; }
     .exito { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
     .error { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
     
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
     section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .busqueda-box { background: #e0f2fe; border: 1px solid #bae6fd;}
     
