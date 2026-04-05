@@ -34,7 +34,7 @@
     onMount(getSatellites);
 
     async function getSatellites() {
-        limpiarMensajes();
+        
         try {
             let url = `${API_URL}?limit=${limit}&offset=${offset}`;
             if (busquedaPais) url += `&country=${busquedaPais}`;
