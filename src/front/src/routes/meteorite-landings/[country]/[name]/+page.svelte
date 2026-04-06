@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	const API = '/api/v1/meteorite-landings';
+	const API = '/api/v2/meteorite-landings';
 	let responseStatusCode = $state(0);
 
 	const countryParam = page.params.country;

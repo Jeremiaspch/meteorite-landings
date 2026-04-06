@@ -125,6 +125,23 @@ router.delete("/", (req, res) => {
 });
 
 /* ============================================================
+    5. FILTROS
+============================================================ */
+router.get("/statistics", (req, res) => {
+    const from = parseInt(req.query.from);
+    const to   = parseInt(req.query.to);
+
+    const filtro = {};
+    if (!isNaN(from)) filtro.year = { ...filtro.year, $gte: from };
+    if (!isNaN(to))   filtro.year = { ...filtro.year, $lte: to };
+
+    db.find(filtro, { _id: 0 }, (err, meteoritos) => {
+        if (err) return res.status(500).json({ error: "Error al consultar la DB" });
+        res.status(200).json(meteoritos);
+    });
+});
+
+/* ============================================================
     3. RECURSO ÚNICO (Identificador Compuesto: /:country/:name)
 ============================================================ */
 
@@ -198,21 +215,6 @@ router.post("/:country/:name", (req, res) => res.status(405).json({ error: "Mét
 router.put("/", (req, res) => res.status(405).json({ error: "Método no permitido." }));
 
 
-/* ============================================================
-    5. FILTROS
-============================================================ */
-router.get("/statistics", (req, res) => {
-    const from = parseInt(req.query.from);
-    const to   = parseInt(req.query.to);
 
-    const filtro = {};
-    if (!isNaN(from)) filtro.year = { ...filtro.year, $gte: from };
-    if (!isNaN(to))   filtro.year = { ...filtro.year, $lte: to };
-
-    db.find(filtro, { _id: 0 }, (err, meteoritos) => {
-        if (err) return res.status(500).json({ error: "Error al consultar la DB" });
-        res.status(200).json(meteoritos);
-    });
-});
 
 module.exports = router;
