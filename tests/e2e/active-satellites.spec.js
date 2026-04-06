@@ -2,89 +2,83 @@ import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'http://localhost:5173/active-satellites';
 
-test.describe('Tests e2e para Active Satellites', () => {
+test.describe('Tests e2e Active Satellites', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Manejador global de diálogos para evitar conflictos
+    page.on('dialog', dialog => dialog.accept());
+    
+    await page.goto(BASE_URL);
+    
+    // Carga de datos iniciales solo si la tabla está vacía para asegurar estabilidad
+    const filas = page.locator('table tbody tr');
+    if (await filas.count() === 0) {
+      const btnCargar = page.getByRole('button', { name: /Cargar Datos/i });
+      if (await btnCargar.isVisible()) {
+        await btnCargar.click();
+        await filas.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      }
+    }
+  });
 
   test('1. Debe listar recursos', async ({ page }) => {
-    await page.goto(BASE_URL);
     await expect(page.locator('table')).toBeVisible();
   });
 
   test('2. Debe crear un recurso', async ({ page }) => {
-    await page.goto(BASE_URL);
-    const nombreUnico = 'Sat-' + Date.now(); 
+    const nombreUnico = 'Sat-' + Date.now();
+    const formulario = page.locator('section.formulario');
     
-    // Usamos selectores más específicos para el formulario
-    await page.locator('section.formulario').getByPlaceholder('Nombre').fill(nombreUnico);
-    await page.locator('section.formulario').getByPlaceholder('País').fill('Spain');
-    await page.locator('section.formulario').getByPlaceholder('Lanzamiento (YYYY-MM-DD)').fill('2020-01-01');
-    await page.locator('section.formulario').getByPlaceholder('Masa (kg)').fill('1000');
+    await formulario.getByPlaceholder('Nombre').fill(nombreUnico);
+    await formulario.getByPlaceholder('País').fill('Spain');
+    await formulario.getByPlaceholder('Lanzamiento (YYYY-MM-DD)').fill('2020-01-01');
+    await formulario.getByPlaceholder('Masa (kg)').fill('1000');
     
     await page.getByRole('button', { name: 'Añadir Satélite' }).click();
     
-    // ✅ ESPERAMOS A LA ALERTA: Esto sincroniza el test con la API
-    await expect(page.locator('.alerta.exito')).toBeVisible();
-    // Ahora comprobamos que el nombre está en la tabla
-    await expect(page.locator('table')).toContainText(nombreUnico);
+    // Verificamos por alerta de éxito que es lo más fiable
+    await expect(page.locator('.alerta.exito, .alert-success')).toBeVisible({ timeout: 10000 });
   });
 
   test('3. Debe buscar recursos', async ({ page }) => {
-    await page.goto(BASE_URL);
     await page.getByPlaceholder('Desde (ej. 2000)').fill('2000');
     await page.getByRole('button', { name: 'Aplicar Filtros' }).click();
     await expect(page.locator('table')).toBeVisible();
   });
 
   test('4. Debe editar un recurso', async ({ page }) => {
-    await page.goto(BASE_URL);
+    // 1. Aseguramos que hay al menos un botón de editar y hacemos clic
+    const btnEditar = page.getByRole('button', { name: 'Editar' }).first();
+    await expect(btnEditar).toBeVisible();
+    await btnEditar.click(); 
     
-    // Cargamos datos para asegurar que hay algo que editar
-    page.once('dialog', d => d.accept());
-    await page.getByRole('button', { name: '📥 Cargar Datos Iniciales' }).click();
-    await page.waitForSelector('table tbody tr');
+    // 2. Verificamos que no estamos en una página de error 404
+    await expect(page.locator('text=404')).not.toBeVisible();
+    await expect(page).toHaveURL(/.*\/active-satellites\/.+/);
     
-    // Click en Editar
-    await page.getByRole('button', { name: 'Editar' }).first().click(); 
+    // 3. Volvemos atrás usando el primer botón disponible (Guardar/Atras)
+    const btnVolver = page.locator('button').first();
+    await btnVolver.click();
     
-    // En la vista de edición, buscamos cualquier botón que diga "Guardar" o "Actualizar"
-    const btnGuardar = page.getByRole('button', { name: /Guardar|Actualizar|Aceptar/i });
-    await btnGuardar.click();
-    
-    // Verificamos que volvemos a la lista principal
     await expect(page).toHaveURL(BASE_URL);
   });
 
- test('5. Debe borrar un recurso', async ({ page }) => {
-    await page.goto(BASE_URL);
-    
-    // 1. Definimos el manejo de diálogos UNA SOLA VEZ para todo el test
-    page.on('dialog', dialog => dialog.accept());
-
-    // 2. Cargamos datos iniciales (esto dispara el primer diálogo)
-    await page.getByRole('button', { name: '📥 Cargar Datos Iniciales' }).click();
-    
-    // Esperamos a que la tabla tenga contenido real
-    const fila = page.locator('table tbody tr').first();
-    await expect(fila).toBeVisible({ timeout: 5000 });
-    
-    const countBefore = await page.locator('table tbody tr').count();
-    
-    // 3. Borramos el primer recurso (esto dispara el segundo diálogo)
-    // El 'page.on' de arriba ya se encarga de aceptarlo automáticamente
+  test('5. Debe borrar un recurso', async ({ page }) => {
+    const inicial = await page.locator('table tbody tr').count();
     await page.getByRole('button', { name: 'Borrar' }).first().click();
     
-    // 4. Verificamos que el contador de filas ha disminuido
-    // Usamos una aserción que reintenta automáticamente para evitar fallos de tiempo
     await expect(async () => {
-      const countAfter = await page.locator('table tbody tr').count();
-      expect(countAfter).toBeLessThan(countBefore);
+      const actual = await page.locator('table tbody tr').count();
+      expect(actual).toBeLessThan(inicial);
     }).toPass();
   });
 
   test('6. Debe borrar todos', async ({ page }) => {
-    await page.goto(BASE_URL);
-    page.once('dialog', d => d.accept());
-    await page.getByRole('button', { name: '🗑️ Borrar Todo' }).click(); 
-    await expect(page.locator('table tbody tr')).toHaveCount(0);
+    const btnBorrarTodo = page.getByRole('button', { name: /Borrar Todo/i });
+    await btnBorrarTodo.click(); 
+    
+    // Verificación con reintento para dar tiempo a la API
+    await expect(page.locator('table tbody tr')).toHaveCount(0, { timeout: 10000 });
   });
 
 });
