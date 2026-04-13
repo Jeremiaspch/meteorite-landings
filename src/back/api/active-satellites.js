@@ -4,7 +4,7 @@ const path = require("path");
 const csv = require('csvtojson');
 const DataStore = require("@seald-io/nedb");
 
-const dbFile = path.join(__dirname, "../data/satellites.db");
+const dbFile = path.join(__dirname, "../../../data/satellites.db");
 const db = new DataStore({ filename: dbFile, autoload: true });
 const satellites_csv = path.join(__dirname, "../data/active-satellites.csv");
 
