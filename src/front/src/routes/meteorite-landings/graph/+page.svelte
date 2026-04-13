@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Highcharts from 'highcharts';
+    import Variwide from 'highcharts/modules/variwide';
 
 	const API = '/api/v2/meteorite-landings';
 
@@ -12,10 +13,12 @@
 	let totalCount = $state(0);   // Para mostrar cuántos registros válidos se usaron
 
 	onMount(async () => {
-		// onMount se ejecuta cuando el componente ya está en el DOM,
-		// por eso chartContainer siempre existe aquí. Es la solución al problema anterior.
-		await cargarYDibujar();
-	});
+        // Inicializar el módulo variwide pasándole Highcharts
+        if (typeof Variwide === 'function') {
+            Variwide(Highcharts);
+        }
+        await cargarYDibujar();
+    });
 
 	async function cargarYDibujar() {
 		loading  = true;
@@ -44,67 +47,66 @@
 
 			totalCount = datosValidos.length;
 
-			if (datosValidos.length === 0) {
-				errorMsg = 'No hay datos con año válido para mostrar.';
+			if (totalCount.length === 0) {
+				errorMsg = 'No hay datos válidos.';
 				return;
 			}
 
-			// Agrupar por año y contar
-			const yearCounts = {};
-			datosValidos.forEach(m => {
-				const y = Number(m.year);
-				yearCounts[y] = (yearCounts[y] || 0) + 1;
-			});
+			// --- NUEVA LÓGICA DE AGRUPACIÓN ---
+        const statsPerYear = {}; // Guardaremos { count: X, totalMass: Y }
+            
+            datosValidos.forEach(m => {
+                const y = Number(m.year);
+                const mass = Number(m.mass) || 0; // Si no hay masa, tratamos como 0
 
-			const years  = Object.keys(yearCounts).sort((a, b) => Number(a) - Number(b));
-			const counts = years.map(y => yearCounts[y]);
+                if (!statsPerYear[y]) {
+                    statsPerYear[y] = { count: 0, totalMass: 0 };
+                }
+                statsPerYear[y].count += 1;
+                statsPerYear[y].totalMass += mass;
+            });
 
-			// Dibujar el gráfico
-			Highcharts.chart(chartContainer, {
-				chart: {
-					type: 'column'
-				},
-				title: {
-					text: 'Meteoritos registrados por año'
-				},
-				subtitle: {
-					text: `${totalCount} registros con año válido de un total de ${datos.length}`
-				},
-				xAxis: {
-					categories: years,
-					title:      { text: 'Año' },
-					labels:     { rotation: -45, step: Math.ceil(years.length / 20) }
-					// step evita solapar etiquetas si hay muchos años
-				},
-				yAxis: {
-					min:   0,
-					title: { text: 'Número de impactos' }
-				},
-				tooltip: {
-					headerFormat: '<b>Año {point.key}</b><br>',
-					pointFormat:  '{point.y} meteoritos registrados'
-				},
-				plotOptions: {
-					column: {
-						pointPadding: 0.1,
-						borderWidth:  0
-					}
-				},
-				series: [{
-					name:  'Meteoritos',
-					data:  counts,
-					color: '#378ADD'
-				}],
-				credits: { enabled: false }
-			});
+            // Ordenamos los años
+            const sortedYears = Object.keys(statsPerYear).sort((a, b) => Number(a) - Number(b));
 
-		} catch (err) {
-			errorMsg = 'Error de conexión con la API.';
-			console.error(err);
-		} finally {
-			loading = false;
-		}
-	}
+            // Formateamos para Variwide: [nombre, valor_y (impactos), valor_z (masa)]
+            const chartData = sortedYears.map(y => [
+                String(y), 
+                statsPerYear[y].count, 
+                Math.round(statsPerYear[y].totalMass)
+            ]);
+
+            Highcharts.chart(chartContainer, {
+                chart: { type: 'variwide' },
+                title: { text: 'Meteoritos: Frecuencia vs Masa Total' },
+                subtitle: { text: 'El ancho de la barra representa la masa total acumulada ese año' },
+                xAxis: { type: 'category', title: { text: 'Año' } },
+                yAxis: { title: { text: 'Número de Impactos' } },
+                tooltip: {
+                    shared: true,
+                    pointFormat: 'Impactos: <b>{point.y}</b><br>' +
+                                'Masa total: <b>{point.z} g</b><br>'
+                },
+                series: [{
+                    name: 'Impactos por año',
+                    data: chartData,
+                    colorByPoint: true,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y}'
+                    }
+                }],
+                credits: { enabled: false }
+            });
+
+        } catch (err) {
+            errorMsg = 'Error de conexión.';
+            console.error(err);
+        } finally {
+            loading = false;
+        }
+    }
+    
 </script>
 
 <h2>Gráfica de meteoritos por año</h2>
