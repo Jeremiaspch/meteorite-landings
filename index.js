@@ -1,20 +1,22 @@
 const express = require("express");
 const path = require("path");
-const { loadBackend } = require("./src/back/index.js"); // Traemos el puente
+const cors = require("cors"); // 1. Importar cors
+const { loadBackend } = require("./src/back/index.js");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(express.json()); // Para leer JSON
+app.use(cors());    
+app.use(express.json());
 
-// 1. Cargamos las APIs PRIMERO (Vital para que no se bloqueen)
+// 1. Cargamos las APIs PRIMERO
 loadBackend(app);
 
-// 2. Apuntamos Express DIRECTAMENTE a la carpeta donde Svelte crea el build
+// 2. Apuntamos Express al build de Svelte
 const buildPath = path.join(__dirname, "src", "front", "build");
 app.use("/", express.static(buildPath));
 
-// 3. Salvavidas para Svelte (Si recargan la página, pasamos el control al index de Svelte)
+// 3. Salvavidas para Svelte (SPA Routing)
 app.get("*", (req, res) => {
     res.sendFile(path.join(buildPath, "index.html"));
 });
