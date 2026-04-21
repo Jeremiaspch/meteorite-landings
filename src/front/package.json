@@ -33,6 +33,6 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
-		"highcharts": "^12.5.0"
+		"highcharts": "^12.6.0"
 	}
 }
