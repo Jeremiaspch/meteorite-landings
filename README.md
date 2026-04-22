@@ -1,22 +1,14 @@
 ## SOS2526-14
 
-- **Team**
+- **Developed by**
   - Jeremías Josué Pluas Charcopa (https://github.com/Jeremiaspch)
-  - Jaime García Algarra (https://github.com/JaimeGarcia1907)
-  - Fernando Reguera Bueno (https://github.com/fernandorebu)
   - --
-- **Project description**: This project examines the relationship between natural objects entering Earth’s atmosphere   and the technological footprint humans send into space. The objective is to compare the historical mass of recovered meteorites against the mass of active satellites and current launch costs. We aim to determine if the human "footprint" in outer space is now outpacing natural phenomena in magnitude, while analyzing the global geographic distribution of these events.
-- **Repository**: [gti-sos/SOS2526-14](https://github.com/gti-sos/SOS2526-14)
+- **Project description**: API que proporciona acceso a un conjunto de datos exhaustivo de la The Meteoritical Society. Contiene información detallada sobre más de 35,000 impactos registrados en la Tierra, incluyendo masa, ubicación geográfica (latitud/longitud), año y clasificación científica (meteoritos válidos y reliquias alteradas). Ideal para proyectos de visualización de datos.
 
-- **Proyecto está desplegado en Render y accesible en esta URL:**
-[https://sos2526-14-yjus.onrender.com/](https://sos2526-14-yjus.onrender.com/)
+- **Repository**: [meteorite-landings-repo](https://github.com/Jeremiaspch/meteorite-landings)
 
-- **APIs v1**:
-  - http://sos2526-14.onrender.com/api/v1/active-satellites/docs (developed by Jaime García Algarra)
-  - http://sos2526-14.onrender.com/api/v1/meteorite-landings/docs (developed by Jeremías J. Pluas Charcopa)
-  - https://sos2526-14.onrender.com/api/v1/space-launches/docs (developed by Fernando Reguera Bueno)
+- **API desplegada en Render y accesible en esta URL:**
+[meteorite-landings.com](https://meteorite-landings.onrender.com/)
 
-- **APIs v2**:
-  - (developed by Jaime García Algarra)
-  - http://sos2526-14.onrender.com/api/v2/meteorite-landings/docs (developed by Jeremías J. Pluas Charcopa)
-  - http://sos2526-14.onrender.com/api/v2/space-launches/docs(developed by Fernando Reguera Bueno)
+- **Documentación**:
+[meteorite-landings-documentacion](http://sos2526-14.onrender.com/api/v2/meteorite-landings/docs) (developed by Jeremías J. Pluas Charcopa)
